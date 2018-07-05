@@ -1,8 +1,7 @@
-var axiosAPI = require('../libs').axios;
-var Helpers = require('./utils');
-var discordAPI = require('../libs').Discord;
-var moment = require('../libs').moment;
-var config = require('../libs').config;
+const axiosAPI = require('../libs').axios;
+const Helpers = require('./utils');
+const discordAPI = require('../libs').Discord;
+const moment = require('../libs').moment;
 
 
 var labels_pays = require('../pays.json');
@@ -55,8 +54,8 @@ class Prono {
   async getAuth() {
     let auth_datas = '';
     let data = {
-      'email': config.MPP_email,
-      'password': config.MPP_MDP,
+      'email': 'theartist768@gmail.com',
+      'password': 'MICKEY3Ds',
       'language': 'fr-FR'
     }
     let config = {

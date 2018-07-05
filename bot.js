@@ -1,42 +1,38 @@
-var libs = require('./libs')
-var autoload = require('./autoload')
+const discordAPI = require('./libs').Discord
+const conf = require('./libs').config
+const bot = require('./libs').bot
+const trap = require('./libs').trollTrap
 
-libs.bot.on('ready', function () {
+let trapEmail = new trap();
+
+const autoload = require('./autoload')
+
+bot.on('ready', function () {
   console.log("Je suis connecté !")
-  libs.bot.user.setActivity(`${libs.bot.guilds.size} servers`);
+  bot.user.setActivity(`${bot.guilds.size} servers`);
   // console.log('test', test)
 })
 
-libs.bot.on('message', message => {
+bot.on('message', message => {
 
   //Good Practice for your bot
-  if(message.content.indexOf(libs.config.prefix) !== 0) return;
+  const args = message.content.slice(conf.prefix.length).trim().split(/ +/g);
 
-  const args = message.content.slice(libs.config.prefix.length).trim().split(/ +/g);
+  // trapEmail.checkSpamWord(args);
+
+  if(message.content.indexOf(conf.prefix) !== 0) return;
+
   // console.log('returning args', args)
   const command = args.shift().toLowerCase();
 
-  let cmd = libs.bot.commands.get(command)
+  let cmd = bot.commands.get(command)
 
   if(cmd) {
     cmd.run(args, message)
   }
 
 
+
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-libs.bot.login(libs.config.token)
+bot.login(conf.token)
