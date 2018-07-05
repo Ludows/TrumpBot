@@ -1,0 +1,12 @@
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+`$ bm`
+`$ bm @identifiant`
+`$ bm @everyone`
+`$ bm help`
+`$ bm @me`
+`$ bm random`
+`$ bm random @identifiant`
+`$ bm random @me`

@@ -1,0 +1,164 @@
+{
+  "pays" : [
+      {
+        "id": 0,
+        "label": "CO",
+        "name": "Colombie"
+      },
+      {
+        "id": 1,
+        "label": "GB-EN",
+        "name": "Angleterre"
+      },
+      {
+        "id": 2,
+        "label": "SE",
+        "name": "Suède"
+      },
+      {
+        "id": 3,
+        "label": "CH",
+        "name": "Suisse"
+      },
+      {
+        "id": 4,
+        "label": "BE",
+        "name": "Belgique"
+      },
+      {
+        "id": 5,
+        "label": "JP",
+        "name": "Japon"
+      },
+      {
+        "id": 6,
+        "label": "BR",
+        "name": "Brésil"
+      },
+      {
+        "id": 7,
+        "label": "MX",
+        "name": "Mexique"
+      },
+      {
+        "id": 8,
+        "label": "HR",
+        "name": "Croatie"
+      },
+      {
+        "id": 9,
+        "label": "DK",
+        "name": "Danemark"
+      },
+      {
+        "id": 10,
+        "label": "ES",
+        "name": "Espagne"
+      },
+      {
+        "id": 11,
+        "label": "RU",
+        "name": "Russie"
+      },
+      {
+        "id": 12,
+        "label": "UY",
+        "name": "Uruguay"
+      },
+      {
+        "id": 13,
+        "label": "PT",
+        "name": "Portugal"
+      },
+      {
+        "id": 14,
+        "label": "FR",
+        "name": "France"
+      },
+      {
+        "id": 15,
+        "label": "AR",
+        "name": "Argentine"
+      },
+      {
+        "id": 16,
+        "label": "PA",
+        "name": "Panama"
+      },
+      {
+        "id": 17,
+        "label": "TN",
+        "name": "Tunisie"
+      },
+      {
+        "id": 18,
+        "label": "SN",
+        "name": "Sénégal"
+      },
+      {
+        "id": 19,
+        "label": "PL",
+        "name": "Pologne"
+      },
+      {
+        "id": 20,
+        "label": "CR",
+        "name": "Costa Rica"
+      },
+      {
+        "id": 21,
+        "label": "RS",
+        "name": "Serbie"
+      },
+      {
+        "id": 22,
+        "label": "KR",
+        "name": "Corée du Sud"
+      },
+      {
+        "id": 23,
+        "label": "DE",
+        "name": "Allemagne"
+      },
+      {
+        "id": 24,
+        "label": "IS",
+        "name": "Islande"
+      },
+      {
+        "id": 25,
+        "label": "NG",
+        "name": "Nigéria"
+      },
+      {
+        "id": 26,
+        "label": "AU",
+        "name": "Australie"
+      },
+      {
+        "id": 27,
+        "label": "IR",
+        "name": "Iran"
+      },
+      {
+        "id": 28,
+        "label": "MA",
+        "name": "Maroc"
+      },
+      {
+        "id": 29,
+        "label": "SA",
+        "name": "Arabie Saoudite"
+      },
+      {
+        "id": 30,
+        "label": "EG",
+        "name": "Egypte"
+      },
+      {
+        "id": 31,
+        "label": "PE",
+        "name": "Pérou"
+      }
+  ]
+}

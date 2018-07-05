@@ -1,0 +1,33 @@
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+*Pour chaques commandes @everyone , @me et les user mentions sont disponibles.
+
+`$ dlbs newcodepromo`
+`$ dlbs newcodepromo random`
+`$ dlbs newcodepromo`
+`$ dlbs newcodepromo random`
+`$ dlbs hotcodepromo`
+`$ dlbs hotcodepromo random`
+`$ dlbs commentcodepromo`
+`$ dlbs commentcodepromo random`
+`$ dlbs hotfree`
+`$ dlbs hotfree random`
+`$ dlbs newfree`
+`$ dlbs newfree random`
+`$ dlbs commentfree`
+`$ dlbs commentfree random`
+`$ dlbs hotgoodplans`
+`$ dlbs hotgoodplans random`
+`$ dlbs newgoodplans`
+`$ dlbs newgoodplans random`
+`$ dlbs commentgoodplans`
+`$ dlbs commentgoodplans random`
+`$ dlbs hotalldeals`
+`$ dlbs hotalldeals random`
+`$ dlbs newalldeals`
+`$ dlbs newalldeals random`
+`$ dlbs commentalldeals`
+`$ dlbs commentalldeals random`
+Currently in dev for matching with groups...

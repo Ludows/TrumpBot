@@ -1,0 +1,6 @@
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+`$ jdoc ma-super-methode-jquery`
+`$ jdoc search [keyword]`

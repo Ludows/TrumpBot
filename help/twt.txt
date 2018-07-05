@@ -1,0 +1,13 @@
+
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+__1 commande principale:__
+**twt**
+
+`$ twt last identifiant_twt`
+`$ twt random identifiant_twt`
+`$ twt search identifiant_twt` --DEV
+
+`$ twt help`

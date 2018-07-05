@@ -1,0 +1,27 @@
+
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+__1 commande principale avec 1 alias est dispos:__
+**jdc**
+**joieducode**
+
+`$ jdc last @identifiant`
+`$ jdc rand @identifiant`
+`$ jdc lastrage @identifiant`
+`$ jdc rage @identifiant`
+`$ jdc lastwin @identifiant`
+`$ jdc win @identifiant`
+`$ jdc lastfail @identifiant`
+`$ jdc lastwtf @identifiant`
+`$ jdc wtf @identifiant`
+`$ jdc laststagiaire @identifiant`
+`$ jdc stagiaire @identifiant`
+`$ jdc lastclient @identifiant`
+`$ jdc client @identifiant`
+`$ jdc commercial @identifiant`
+`$ jdc lastcommercial @identifiant`
+`$ jdc lastchef @identifiant`
+`$ jdc chef @identifiant`
+`$ jdc help` --DEV

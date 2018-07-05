@@ -1,0 +1,34 @@
+
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+__1 commande principale avec 2 alias sont dispos:__
+**cmc**
+**coinmarket**
+**coinmarketcap**
+
+`$ cmc [tacrypto]`
+`$ cmc [tacrypto] @identifiant` --DEV
+`$ cmc [tacrypto] @everyone` --DEV
+`$ cmc [tacrypto] @me` --DEV
+
+`$ cmc ongreaterthan [crypto] [nombre]`
+`$ cmc ongreaterthan [crypto] [nombre] @everyone` --DEV
+`$ cmc ongreaterthan [crypto] [nombre] @identifiant` --DEV
+
+`$ cmc onlesserthan [crypto] [nombre]`
+
+
+`$ cmc getlist [number]`
+`$ cmc getlist [number] @identifiant` --DEV
+`$ cmc getlist [number] @everyone` --DEV
+`$ cmc getlist [number] @me` --DEV
+
+`$ cmc onpercentchangeinoneday [crypto] [number]`
+
+`$ cmc onpercentchangeinsevenday [crypto] [number]`
+
+`$ cmc onpercentinonehour [crypto] [number]` --DEV
+
+`$ cmc help`

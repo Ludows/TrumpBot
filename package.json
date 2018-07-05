@@ -1,0 +1,32 @@
+{
+  "name": "trumpbot",
+  "version": "0.0.1",
+  "description": "Super bot de ouf",
+  "main": "bot.js",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "cheerio": "^1.0.0-rc.2",
+    "coinnames": "^1.0.1",
+    "discord.js": "^11.3.0",
+    "feed-read": "0.0.1",
+    "giphy-api": "^1.2.7",
+    "html-encoder-decoder": "^1.3.7",
+    "mail": "^0.2.3",
+    "moment": "^2.22.2",
+    "node-coinmarketcap": "^0.2.0",
+    "tumblr": "^0.4.1",
+    "twit": "^2.2.9",
+    "twitter": "^1.7.1",
+    "wordpress-rest-api": "^0.8.0",
+    "xml-reader": "^2.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "boot": "nodemon bot.js"
+  },
+  "author": "Lulu",
+  "license": "MIT"
+}
