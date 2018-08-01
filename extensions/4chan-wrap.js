@@ -51,8 +51,8 @@ class Chan {
 				})
 			})
       index = Math.floor(Math.random() * (all_images.length - 1));
-			console.log('all_images', all_images);
-			console.log('image selected', all_images[index]);
+			// console.log('all_images', all_images);
+			// console.log('image selected', all_images[index]);
 
 
 

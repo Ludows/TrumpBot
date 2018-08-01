@@ -19,6 +19,7 @@
     "twit": "^2.2.9",
     "twitter": "^1.7.1",
     "wordpress-rest-api": "^0.8.0",
+    "wpapi": "^1.1.2",
     "xml-reader": "^2.4.3"
   },
   "devDependencies": {

@@ -28,5 +28,7 @@ module.exports.Errors = require('./extensions/errors');
 module.exports.pronos = require('./extensions/pronos');
 module.exports.trump = require('./extensions/trumpfacts');
 module.exports.trollTrap = require('./extensions/email');
+module.exports.jdc = require('./extensions/joie-wrap');
+
 // module.exports.RedditCrawl = require('./extensions/indexer');
 module.exports.HTMLDecoderEncoder = require("html-encoder-decoder");

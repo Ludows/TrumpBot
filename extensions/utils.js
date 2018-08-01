@@ -59,13 +59,15 @@ Utils.prototype = {
     return [a, b];
   },
   isId: function(args) {
-    var regexp = /(@\d+(d)*)/gi;
+    // console.log('the args', args)
+    var regexp = /(@!\d+(d)*)/gi;
     var theid;
     args.forEach(function(val) {
       theid = val.match(regexp);
+      // console.log('matchId ?', theid)
     })
 
-    console.log('theid is', theid)
+    // console.log('theid is', theid)
 
     if (theid === null) {
       return false;
@@ -149,14 +151,8 @@ Utils.prototype = {
     if (Utils.prototype.isId(obj.args) != false) {
       var idFormated = Utils.prototype.idChecker(obj.args);
       // console.log('idFormated', idFormated.toString())
-      if (typeof obj.embed === 'array') {
-        obj.embed.forEach(function(val) {
-          obj.message.guild.members.get(idFormated.toString()).send(val);
-        })
-      } else {
         obj.message.guild.members.get(idFormated.toString()).send(embed);
         obj.message.reply('Cela a bien été envoyé !');
-      }
 
     } else if (obj.args.includes('@everyone') === true) {
       let allMembers = obj.message.guild.members;
@@ -165,13 +161,7 @@ Utils.prototype = {
         // console.log('element', element);
         if (element.user.bot === false) {
 
-          if (typeof obj.embed === 'array') {
-            obj.embed.forEach(function(val) {
-              element.user.send(val);
-            })
-          } else {
             element.user.send(embed);
-          }
         }
 
       })
@@ -179,23 +169,12 @@ Utils.prototype = {
     } else if (obj.args.includes('@me') === true) {
       obj.message.reply('Rien que pour toi...')
 
-      if (typeof obj.embed === 'array') {
-        obj.embed.forEach(function(val) {
-          obj.message.author.send(val);
-        })
-      } else {
+
         obj.message.author.send(embed);
-      }
     } else {
       // obj.message.reply('Rien que pour toi... C\'est envoyé !')
 
-      if (typeof obj.embed === 'array') {
-        obj.embed.forEach(function(val) {
-          obj.message.channel.send(val);
-        })
-      } else {
         obj.message.channel.send(embed);
-      }
 
       console.log('sended')
     }
