@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const Media = sequelize.define('Media', {
     source: DataTypes.STRING,
