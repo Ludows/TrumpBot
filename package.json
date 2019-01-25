@@ -16,10 +16,12 @@
     "mysql2": "^1.6.4",
     "node-coinmarketcap": "^0.2.0",
     "sequelize": "^4.42.0",
+    "nodemailer": "^4.6.7",
     "tumblr": "^0.4.1",
     "twit": "^2.2.9",
     "twitter": "^1.7.1",
     "wordpress-rest-api": "^0.8.0",
+    "wpapi": "^1.1.2",
     "xml-reader": "^2.4.3"
   },
   "devDependencies": {
