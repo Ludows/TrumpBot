@@ -5,7 +5,7 @@ var axios = require('../libs').axios;
 
 var scrolller = 'https://scrolller.com/api/random/traps';
 
-var mail = require('../libs').Mail.Mail({
+var mail = require('../libs').mail.Mail({
   host: 'smtp.gmail.com',
   username: 'theartist768@gmail.com',
   password: 'POPEYE60'

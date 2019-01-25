@@ -7,6 +7,6 @@ __voici les différents commandes :__
 `$ bm @everyone`
 `$ bm help`
 `$ bm @me`
-`$ bm random`
+`$ bm random` => In Work....
 `$ bm random @identifiant`
 `$ bm random @me`

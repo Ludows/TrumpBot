@@ -8,8 +8,10 @@ fs.readdir('./cmd/', function(err, files) {
 		// console.log('files', files)
 	let allFiles = new Array();
 	files.forEach(function(file) {
-		var content = file.split('.').shift();
-		allFiles.push(content)
+		if(file.includes('.old') === false) {
+			var content = file.split('.').shift();
+			allFiles.push(content)
+		}
 	})
 
 	// console.log('allFiles', allFiles)
