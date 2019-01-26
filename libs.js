@@ -12,6 +12,7 @@ module.exports.CoinMarketCap = require("node-coinmarketcap");
 module.exports.giphy = require('giphy-api')(module.exports.config.giphy);
 module.exports.fs = require('fs');
 module.exports.mail = require('nodemailer');
+module.exports.cron = require('node-schedule');
 module.exports.sequelize = require('sequelize');
 // module.exports.Pornsearch = require('pornsearch').default;
 module.exports.tumblr = require('tumblr');
