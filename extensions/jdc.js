@@ -4,6 +4,7 @@ var fsAPI = require('../libs').fs;
 var config = require('../libs').config;
 var Helpers = require('../libs').utils;
 var decoder = require('html-encoder-decoder');
+var cheerioAPI = require('../libs').cheerio;
 var _ = require('../libs').lodash;
 
 var Sequelize = require('../libs').sequelize;
@@ -23,100 +24,132 @@ class JoieDuCode {
         endpoint: 'https://lesjoiesducode.fr/wp-json'
     });
   }
-  getAll( request ) {
+  getAll( request , label) {
     var self = this;
-    return request.then(function( response ) {
+    return request.then(( response ) => {
       if ( ! response._paging || ! response._paging.next ) {
         return response;
       }
+      // console.log('response', response);
+      // console.log('response length', response.length)
+      // On rentre dans le cas de la population de la table Tag
+      response.forEach((res) => {
+        if(label === 'tag') {
+            Tag.findOne({ where: {realId: res.id, slug: res.slug , name: res.name}  }).then((tagEntry) => {
+                // single random encounter
+                if(!tagEntry) {
+                  Tag.create({ realId: res.id, slug: res.slug , name: res.name }).then(taskdetata => {
+                    // you can now access the newly created task via the variable task
+                    console.log('done');
+                  })
+                }
+
+            });
+        }
+        else if(label === 'post') {
+          // On rentre dans le cas de la population de la table Media
+          // console.log('res', res);
+
+          var format_src;
+          const $ = cheerioAPI.load(res.content.rendered);
+
+          if($('video').length > 0) {
+            // le cas d'un gif a recup
+            //
+            // on voit si on peut recup un gif
+            if($('video').find('object').length > 0) {
+              format_src = $('video').find('object').attr('data');
+            }
+            else {
+              format_src = $('video').find('source').first().attr('src');
+            }
+          }
+          else if($('video').length === 0) {
+
+            format_src = $('img').attr('src');
+          }
+          else {
+            format_src = "";
+          }
+
+          Media.findOne({ where: { source: format_src, title: decoder.decode(res.title.rendered) , link: res.link } }).then( async function (mediaentry) {
+              // single random encounter
+              var orm_obj;
+              if(res.tags.length > 0) {
+                let labels = new Array();
+                res.tags.forEach((tag) => {
+                  console.log('tag', tag)
+                  Tag.findOne({ where: {realId: parseInt(tag) }  }).then((tagentry) => {
+
+                    console.log('entry tag ?', tagentry);
+                    labels.push(tagentry.dataValues.slug);
+                    orm_obj = { source: format_src, title: decoder.decode(res.title.rendered) , tags: labels.join().toString(), link: res.link }
+                    if(!mediaentry) {
+                      Media.create(orm_obj).then(taskMedia => {
+                        // you can now access the newly created task via the variable task
+                        console.log('done');
+                      })
+                    }
+
+                  })
+                })
+              }
+              else {
+                orm_obj = { source: format_src, title: decoder.decode(res.title.rendered) , tags: '', link: res.link }
+                if(!mediaentry) {
+                  Media.create(orm_obj).then(taskMedia => {
+                    // you can now access the newly created task via the variable task
+                    console.log('done');
+                  })
+                }
+              }
+          });
+
+        }
+      })
+
       // Request the next page and return both responses as one collection
       return Promise.all([
         response,
-        self.getAll( response._paging.next )
-      ]).then(function( responses ) {
+        self.getAll( response._paging.next , label)
+      ]).then(async function( responses ) {
         return _.flatten( responses );
       });
     });
   }
-  getTags() {
-    this.wp.tags().then(tag => {
-      console.log('tag', tag);
-    })
-  }
-  getTopic(topic) {
-    let id;
-
-    console.log('the topic', topic)
-
-    // définition de l'id
-    switch (topic.toLowerCase()) {
-      case 'rage':
-           id = 3;
-        break;
-      case 'fail':
-           id = 4;
-          break;
-      case 'win':
-           id = 5;
-          break;
-      case 'stagiaire':
-           id = 6;
-          break;
-      case 'commercial':
-          id = 7;
-          break;
-      case 'best':
-          id = 11;
-          break;
-      case 'wtf':
-          id = 8;
-          break;
-      case 'client':
-          id = 9;
-          break;
-      case 'chef':
-          id = 10;
-          break;
-      default:
-
-    }
-
-
-  }
-  populate() {
+  populateTags() {
     var self = this;
-     this.getAll(this.wp.posts()).then(function(allPosts) {
-      console.log('allPosts', allPosts.length)
-      allPosts.forEach((post) => {
-        // console.log('post', post)
-         self.media.id(post.featured_media).then(isMedia => {
-           Media.findOne({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then((entry) => {
-               // single random encounter
-               if(!entry) {
-                 Media.create({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then(task => {
-                   // you can now access the newly created task via the variable task
-                   console.log('done');
-                 })
-               }
-
-           });
-         })
-
-
-
-
-      })
+    this.getAll(self.wp.tags(), 'tag').then(taglist => {
+      console.log('taglist', taglist)
     })
+
+  }
+  populatePosts() {
+    var self = this;
+    this.getAll(self.wp.posts(), 'post').then(post => {
+      console.log('post', post)
+    })
+
   }
   async getMedia(obj, func) {
     let ret = undefined;
+    const Op = Sequelize.Op;
     if(!obj) {
-      throw new Error('Vous devez renseigner un objet avec la propriété random (true or false)');
+      throw new Error('Vous devez renseigner un objet avec la propriété topic (true or false)');
     }
     else {
       // console.log('obj', obj);
-      if(obj.random === true) {
+      if(obj.topic === '') {
         await Media.findOne({ order: [
+        [Sequelize.literal('RAND()')]
+        ] }).then((entries) => {
+            // single random encounter
+
+            ret = entries;
+        });
+      }
+      else {
+        await Media.findOne({ where: {tags: {[Op.like]: obj.topic}  } , order: [
         [Sequelize.literal('RAND()')]
       ] }).then((entries) => {
             // single random encounter
@@ -124,20 +157,8 @@ class JoieDuCode {
             ret = entries;
         });
       }
-      else if (obj.random === false) {
-        await Media.findAll({
-          limit: 1,
-          order: [ [ 'createdAt', 'DESC' ]]
-        }).then(function(entries){
-          //only difference is that you get users list limited to 1
-          //entries[0]
-          ret = entries[0];
-        });
 
-      }
-      else {
-        throw new console.error('La propriété random est nécessaire.');
-      }
+
     }
     return ret;
   }

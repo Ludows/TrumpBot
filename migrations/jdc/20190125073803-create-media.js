@@ -14,6 +14,9 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
+      tags: {
+        type: Sequelize.STRING
+      },
       link: {
         type: Sequelize.STRING
       },
