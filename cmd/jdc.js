@@ -9,7 +9,8 @@ var jdc_wrap = require('../libs').jdc;
 var jdc = new jdc_wrap();
 
 module.exports.run = function(args, message) {
-  jdc.getTopic(args[0])
+  console.log('jdc appelé')
+  jdc.getTags()
 }
 
 module.exports.help = {

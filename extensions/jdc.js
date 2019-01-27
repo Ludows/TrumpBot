@@ -7,19 +7,20 @@ var decoder = require('html-encoder-decoder');
 var _ = require('../libs').lodash;
 
 var Sequelize = require('../libs').sequelize;
-var dbDriver = require('../models/index').bm;
+var dbDriver = require('../models/index').jdc;
 
 
-const Media = require( '../models/bm/media')(dbDriver, Sequelize.DataTypes);
+const Media = require( '../models/jdc/media')(dbDriver, Sequelize.DataTypes);
+const Tag = require( '../models/jdc/tag')(dbDriver, Sequelize.DataTypes);
 
 var helper = new Helpers();
 
 var wpAPI = require('../libs').WP;
 
-class Bonjourmadame {
+class JoieDuCode {
   constructor() {
     this.wp = new wpAPI({
-        endpoint: 'http://www.bonjourmadame.fr/wp-json'
+        endpoint: 'https://lesjoiesducode.fr/wp-json'
     });
   }
   getAll( request ) {
@@ -37,32 +38,73 @@ class Bonjourmadame {
       });
     });
   }
+  getTags() {
+    this.wp.tags().then(tag => {
+      console.log('tag', tag);
+    })
+  }
+  getTopic(topic) {
+    let id;
+
+    console.log('the topic', topic)
+
+    // définition de l'id
+    switch (topic.toLowerCase()) {
+      case 'rage':
+           id = 3;
+        break;
+      case 'fail':
+           id = 4;
+          break;
+      case 'win':
+           id = 5;
+          break;
+      case 'stagiaire':
+           id = 6;
+          break;
+      case 'commercial':
+          id = 7;
+          break;
+      case 'best':
+          id = 11;
+          break;
+      case 'wtf':
+          id = 8;
+          break;
+      case 'client':
+          id = 9;
+          break;
+      case 'chef':
+          id = 10;
+          break;
+      default:
+
+    }
+
+
+  }
   populate() {
+    var self = this;
      this.getAll(this.wp.posts()).then(function(allPosts) {
-      // console.log('allPosts', allPosts.length)
+      console.log('allPosts', allPosts.length)
       allPosts.forEach((post) => {
         // console.log('post', post)
-        var postdate = new Date(post.date);
-        var isWeekend = (postdate.getDay() === 6) || (postdate.getDay() === 0);
-        if(!isWeekend) {
+         self.media.id(post.featured_media).then(isMedia => {
+           Media.findOne({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then((entry) => {
+               // single random encounter
+               if(!entry) {
+                 Media.create({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then(task => {
+                   // you can now access the newly created task via the variable task
+                   console.log('done');
+                 })
+               }
 
-          var re = /src=['|"][^'|"]*?['|"]/gi;
-          var src = post.content.rendered.match(re);
-          var format_src = src[0].split('"');
-
-          Media.findOne({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then((entry) => {
-              // single random encounter
-              if(!entry) {
-                Media.create({ source: format_src[1], title: decoder.decode(post.title.rendered) , link: post.link }).then(task => {
-                  // you can now access the newly created task via the variable task
-                  console.log('done');
-                })
-              }
-
-          });
+           });
+         })
 
 
-        }
+
+
       })
     })
   }
@@ -115,4 +157,4 @@ class Bonjourmadame {
   }
 }
 
-module.exports = Bonjourmadame;
+module.exports = JoieDuCode;
