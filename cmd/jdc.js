@@ -41,3 +41,5 @@ module.exports.help = {
   subcommands: [],
   help: './help/jdc.txt'
 }
+
+var cmd_bm = fsAPI.readFileSync( module.exports.help.help , 'utf-8');

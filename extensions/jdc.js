@@ -1,6 +1,5 @@
 var discordAPI = require('../libs').Discord;
 var bot = require('../libs').bot;
-var fsAPI = require('../libs').fs;
 var config = require('../libs').config;
 var Helpers = require('../libs').utils;
 var decoder = require('html-encoder-decoder');
