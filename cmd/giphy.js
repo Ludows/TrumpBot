@@ -1,74 +1,72 @@
-var discordAPI = require('../libs').Discord;
-var giphyAPI = require('../libs').giphy;
+var giphyBundle = require('../libs').giphyExt;
+
+var gph = new giphyBundle({'limit': 30});
+
+var fsAPI = require('../libs').fs;
 
 
 module.exports.run = function(args, message) {
-
+  // $ giphy search [term]
+  // result => 30 résultats with id
+  // $ giphy [id]
+  // $ giphy random [term]
+  // $ giphy trending => 30 résultats avec id
+  // $ giphy stickers => 30 résultats avec id
+  //
+  switch (args[0]) {
+   case 'help':
+    message.channel.send(cmd_gph);
+    break;
+    case 'search':
+      if(args[1] === undefined) {
+        message.channel.send('Veuillez renseigner un terme à votre recherche');
+        return false;
+      }
+      gph.search({query: args[1]}).then((idstr) => {
+          gph.render(idstr, message, args);
+      })
+      break;
+      case 'random':
+        let queryMethod;
+        if(args[1] === undefined) {
+          queryMethod = 'auto';
+        }
+        else {
+          queryMethod = args[1]
+        }
+        gph.random({query: queryMethod}).then((gif) => {
+          gph.render(gif, message, args);
+        })
+        break;
+      case 'trending':
+        gph.trend().then((gif) => {
+            gph.render(gif, message, args);
+        })
+        break;
+      case 'stickers':
+        if(args[1] === undefined) {
+          message.channel.send('Veuillez renseigner un terme à votre recherche');
+          return false;
+        }
+        gph.stickers({query: args[1]}).then((gif) => {
+          gph.render(gif, message, args);
+        })
+        break;
+    default:
+      if(args[0] === undefined) {
+        message.channel.send('Veuillez renseigner un id du gif animé souhaité');
+        return false;
+      }
+      gph.getMediaById(args[0]).then((gif) => {
+          gph.render(gif, message, args);
+      })
+  }
 }
 
 module.exports.help = {
-  name: 'giphy',
-  subcommands: [],
-  help: '../help/giphy.txt'
+  name: ['giphy', 'gph'],
+  subcommands: ['help', 'search', 'random', 'trending', 'stickers'],
+  help: './help/gph.txt'
 }
 
-exports.sendGif = function(keyword, message) {
-    if (!keyword) {
-      message.reply('Tu fais gaffe a ce que tu fais gros ? ex : !med [keyword]');
-    }
-    let minimum = 1;
-
-    giphyAPI.random({tag:keyword, limit: minimum}).then(function(res) {
-
-    const embed = new discordAPI.RichEmbed()
-    .setImage(res.data.image_original_url)
-    .setURL(res.data.url)
-
-    message.channel.send({embed});
-    });
-}
-
-exports.searchGiphy = function(keyword, limit, message) {
-
-   if (!keyword) {
-     message.reply('Tu dois rechercher quelquechose mon petit gars. ex : !med giphy search patates');
-   }
-
-   let minimum = 1;
-   if (limit) {
-     minimum = limit
-   }
-
-   giphyAPI.search({q:keyword, limit: minimum}).then(function(res) {
-
-    const embed = new discordAPI.RichEmbed()
-    .setTitle(res.data[minimum - 1].title)
-    .setImage(res.data[minimum - 1].images.original_still.url)
-    .setURL(res.data[minimum - 1].url)
-
-    message.channel.send({embed});
-   });
-}
-
-exports.randomGiphy = function(keyword, limit, message) {
-
-   if (!keyword) {
-     message.reply('Tu dois rechercher quelquechose mon petit gars. ex : !med giphy random patates');
-   }
-
-   let minimum = 1;
-   if (limit) {
-     minimum = limit
-   }
-
-   giphyAPI.random({tag:keyword, limit: limit}).then(function(res) {
-
-    // console.log('res', res)
-    const embed = new discordAPI.RichEmbed()
-    .setTitle('Random Image :)')
-    .setImage(res.data.image_original_url)
-    .setURL(res.data.url)
-
-    message.channel.send({embed});
-    });
-}
+var cmd_gph = fsAPI.readFileSync( module.exports.help.help , 'utf-8');

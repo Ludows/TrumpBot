@@ -1,0 +1,13 @@
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+__1 commande principale avec 2 alias sont dispos:__
+**giphy**
+**gph**
+
+`$ giphy search {term}`
+`$ giphy random {term} <= facultatif`
+`$ giphy trending`
+`$ giphy stickers {term}`
+`$ giphy [id]`
