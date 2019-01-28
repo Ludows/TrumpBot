@@ -31,7 +31,7 @@ module.exports.run = function(args, message) {
         break;
       default:
         bm.getMedia({random: false}).then(media => {
-          console.log('media', media)
+          // console.log('media', media)
           bm.giveMedia(media, message, args);
         })
     }

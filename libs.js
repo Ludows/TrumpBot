@@ -33,6 +33,7 @@ module.exports.bm = require('./extensions/bm');
 module.exports.trump = require('./extensions/trumpfacts');
 module.exports.trollTrap = require('./extensions/email');
 module.exports.jdc = require('./extensions/jdc');
+module.exports.giphyExt = require('./extensions/giphy');
 
 // module.exports.RedditCrawl = require('./extensions/indexer');
 module.exports.HTMLDecoderEncoder = require("html-encoder-decoder");
