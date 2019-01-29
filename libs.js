@@ -5,6 +5,8 @@ module.exports.feed = require("feed-read");
 module.exports.twt = require('twitter');
 module.exports.axios = require('axios');
 module.exports.lodash = require('lodash');
+module.exports.path = require('path');
+
 // module.exports.GoogleSpreadsheet = require('google-spreadsheet');
 module.exports.async = require('async');
 module.exports.cheerio = require('cheerio');
@@ -14,7 +16,6 @@ module.exports.fs = require('fs');
 module.exports.mail = require('nodemailer');
 module.exports.cron = require('node-schedule');
 module.exports.sequelize = require('sequelize');
-// module.exports.Pornsearch = require('pornsearch').default;
 module.exports.tumblr = require('tumblr');
 // module.exports.Instagram = require('node-instagram').default;
 module.exports.WP = require('wordpress-rest-api');
@@ -33,6 +34,7 @@ module.exports.bm = require('./extensions/bm');
 module.exports.trump = require('./extensions/trumpfacts');
 module.exports.trollTrap = require('./extensions/email');
 module.exports.jdc = require('./extensions/jdc');
+module.exports.tenorModule = require('./extensions/tenor');
 module.exports.giphyExt = require('./extensions/giphy');
 
 // module.exports.RedditCrawl = require('./extensions/indexer');

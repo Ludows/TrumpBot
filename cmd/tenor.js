@@ -15,20 +15,18 @@ module.exports.run = function(args, message) {
    console.log('tenor args', args);
 
    switch (args[0]) {
+     case 'help':
+    		// statements_1
+    		break;
    	case 'search':
    		// statements_1
    		url = "https://api.tenor.com/v1/search_suggestions?q=" + args[1] + "&key=" +
             config.tenor + "&limit=" + lmt+ "";
    		break;
-   	case 'trend':
+   	case 'trending':
    		// statements_1
    		url = "https://api.tenor.com/v1/trending?&key=" +
             config.tenor + "";
-   		break;
-   	case 'categories':
-   		// statements_1
-   		url = "https://api.tenor.com/v1/categories?&key=" +
-            config.tenor +"";
    		break;
    	case 'random':
    		// statements_1
