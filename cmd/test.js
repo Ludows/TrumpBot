@@ -1,12 +1,14 @@
 let tenorAPI = require('../libs').tenorModule;
 let config = require('../libs').config;
+var fsAPI = require('../libs').fs;
+
 
 let tnr = new tenorAPI({key: config.tenor, limit: 30})
 
 module.exports.run = function(args, message) {
   switch (args[0]) {
    case 'help':
-    // message.channel.send(cmd_gph);
+    message.channel.send(cmd_tnr);
     break;
     case 'suggestions':
       if(args[1] === undefined) {
@@ -54,7 +56,8 @@ module.exports.run = function(args, message) {
 }
 
 module.exports.help = {
-  name: ['tnr'],
+  name: ['tenor', 'tnr'],
   subcommands: [],
   help: './help/tnr.txt'
 }
+var cmd_tnr = fsAPI.readFileSync( module.exports.help.help , 'utf-8');

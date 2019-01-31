@@ -1,0 +1,15 @@
+
+**Bonjour jeune padawan**
+
+__voici les différents commandes :__
+
+__2 commandes principales:__
+**tenor**
+**tnr**
+
+`$ tnr suggestions {term}` <= Work...
+`$ tnr search {term}`
+`$ tnr random {term}`
+`$ tnr trending`
+`$ tnr {id}`
+`$ tnr help`
