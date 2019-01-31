@@ -69,17 +69,62 @@ class tenorApi {
     })
     return rt;
   }
-  async trending() {
+  async trend() {
+    let rts = '';
+    var url = this.getPath('trending?key='+this.opts.key+'&limit='+this.opts.limit);
+    await request.get(url, { responseType: 'json' }).then((response) => {
+      console.log('response', response.data)
 
+     if(response.data.results.length > 0) {
+       rts += "Résultats pour les gifs du moment ! \n\n";
+       response.data.results.forEach((result) => {
+        rts += config.prefix + ' tnr ' + result.id + (result.title.length > 0 ? " => "+ result.title+ '\n' : "\n");
+       })
+     }
+
+
+    })
+    return rts;
   }
-  async random() {
+  async random(obj) {
+    let rt = '';
+    var url = this.getPath('random?q='+obj.query+'&key='+this.opts.key+'&limit=1');
+    await request.get(url, { responseType: 'json' }).then((response) => {
+      console.log('response', response.data)
+      rt = response.data.results[0];
 
+
+    })
+    return rt;
   }
-  async search() {
+  async search(obj) {
+    let rt = '';
+    var url = this.getPath('search?q='+obj.query+'&key='+this.opts.key+'&limit='+this.opts.limit);
+    await request.get(url, { responseType: 'json' }).then((response) => {
+      console.log('response', response.data)
 
+      if(response.data.results.length > 0) {
+        rt += "Résultats pour les gifs du moment ! \n\n";
+        response.data.results.forEach((result) => {
+          rt += config.prefix + ' tnr ' + result.id + (result.title.length > 0 ? " => "+ result.title+ '\n' : "\n");
+        })
+      }
+      
+
+
+    })
+    return rt;
   }
-  async getMediaById() {
+  async getMediaById(idstr) {
+    let rt = '';
+    var url = this.getPath('gifs?ids='+idstr+'&key='+this.opts.key+'&limit=1');
+    await request.get(url, { responseType: 'json' }).then((response) => {
+      console.log('response', response.data)
+      rt = response.data.results[0];
 
+
+    })
+    return rt;
   }
   render(result, message, args) {
     let embed;
@@ -88,15 +133,14 @@ class tenorApi {
     }
     else {
       embed = new discordAPI.RichEmbed()
-      console.log('result ?', embed)
-      // .setTitle(result.title);
-      // if(result.image_original_url) {
-      //   embed.setImage(result.image_original_url)
-      // }
-      // else {
-      //   embed.setImage(result.images.original.url)
-      // }
-      // embed.setURL(result.bitly_url);
+      console.log('result ?', result.media.length)
+      if(result.title) {
+        embed.setTitle(result.title);
+      }
+      if(result.media[0].tinygif) {
+        embed.setImage(result.media[0].tinygif.url)
+      }
+      embed.setURL(result.itemurl);
     }
 
 
