@@ -17,6 +17,9 @@ module.exports.run = function(args, message) {
         timap.register(message, args);
 
     break;
+    case 'unregister':
+        timap.unregister(message, args);
+    break;
   }
 }
 
