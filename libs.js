@@ -35,6 +35,7 @@ module.exports.trump = require('./extensions/trumpfacts');
 module.exports.trollTrap = require('./extensions/email');
 module.exports.jdc = require('./extensions/jdc');
 module.exports.tenorModule = require('./extensions/tenor');
+module.exports.timapModule = require('./extensions/timap');
 module.exports.giphyExt = require('./extensions/giphy');
 
 // module.exports.RedditCrawl = require('./extensions/indexer');

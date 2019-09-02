@@ -3,11 +3,9 @@
     "username": "root",
     "password": "root",
     "database": "bm",
-    "host": "127.0.0.1",
-    "port": "8080",
-    "dialect": "mysql",
-    "dialectOptions": {
-      "socketPath": "/Applications/MAMP/tmp/mysql/mysql.sock"
-    }
+    "host": "localhost",
+    "port": "3306",
+    "dialect": "mysql"
+    
   }
 }

@@ -18,6 +18,7 @@
     "node-coinmarketcap": "^0.2.0",
     "node-schedule": "^1.3.1",
     "nodemailer": "^4.6.7",
+    "puppeteer": "^1.19.0",
     "sequelize": "^4.42.0",
     "tumblr": "^0.4.1",
     "twit": "^2.2.9",
@@ -33,7 +34,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "boot": "nodemon bot.js",
     "migrate:bm": "sequelize db:migrate --config config/bm.json --migrations-path migrations/bm/",
-    "migrate:jdc": "sequelize db:migrate --config config/jdc.json --migrations-path migrations/jdc/"
+    "migrate:jdc": "sequelize db:migrate --config config/jdc.json --migrations-path migrations/jdc/",
+    "migrate:timap": "sequelize db:migrate --config config/timap.json --migrations-path migrations/timap/",
+    "seed:timap": "sequelize db:seed --seed 20190902133213-Users --config config/timap.json --seeders-path seeders/timap/"
   },
   "author": "Lulu",
   "license": "MIT"
