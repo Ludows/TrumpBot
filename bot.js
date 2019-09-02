@@ -10,7 +10,7 @@ const autoload = require('./autoload')
 bot.on('ready', function () {
   console.log("Je suis connecté !")
   bot.user.setActivity(`${bot.guilds.size} servers`);
-  // console.log('test', test)
+  // console.log('bot.users', bot.users)
 })
 
 bot.on('message', message => {

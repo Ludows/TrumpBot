@@ -14,6 +14,7 @@ module.exports = {
     */
 
     return queryInterface.bulkInsert('Users', [{
+      username: 'lulu',
       email: 'l.cointrel@mediactive.fr',
       password: 'mediactive',
       createdAt: new Date(),

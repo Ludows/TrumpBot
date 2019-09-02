@@ -3,6 +3,7 @@ let config = require('../libs').config;
 var fsAPI = require('../libs').fs;
 
 
+let timap = new timapAPI();
 
 
 
@@ -11,6 +12,11 @@ module.exports.run = function(args, message) {
     //timap connect 
     // timap register task="troc" hour="8h" day="now"
     // timap cron time="17h"
+
+    case 'register':
+        timap.register(message, args);
+
+    break;
   }
 }
 

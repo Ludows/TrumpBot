@@ -36,7 +36,8 @@
     "migrate:bm": "sequelize db:migrate --config config/bm.json --migrations-path migrations/bm/",
     "migrate:jdc": "sequelize db:migrate --config config/jdc.json --migrations-path migrations/jdc/",
     "migrate:timap": "sequelize db:migrate --config config/timap.json --migrations-path migrations/timap/",
-    "seed:timap": "sequelize db:seed --seed 20190902133213-Users --config config/timap.json --seeders-path seeders/timap/"
+    "seed:timap": "sequelize db:seed --seed 20190902133213-Users --config config/timap.json --seeders-path seeders/timap/",
+    "seed:timap:undo": "sequelize db:seed:undo --seed 20190902133213-Users --config config/timap.json --seeders-path seeders/timap/"
   },
   "author": "Lulu",
   "license": "MIT"
