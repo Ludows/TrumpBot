@@ -1,8 +1,10 @@
 var Sequelize = require('../libs').sequelize;
 var dbDriver = require('../models/index').timap;
-const Timap = require( '../models/timap/user')(dbDriver, Sequelize.DataTypes);
+const TimapUsers = require( '../models/timap/user')(dbDriver, Sequelize.DataTypes);
 const Tasks = require( '../models/timap/tasks')(dbDriver, Sequelize.DataTypes);
 const moment = require('moment');
+const axios = require('axios');
+
 
 const bot = require('../libs').bot
 
@@ -14,7 +16,7 @@ class timap {
     async connect(collection) {
         
         
-        var connection = await Timap.findOne({ username: collection.username });
+        var connection = await TimapUsers.findOne({ username: collection.username });
 
         return connection;
 
@@ -56,9 +58,9 @@ class timap {
     register(message, args) {
         this.currentMessage = message;
         var curr_user = bot.users.get( message.author.id );
-        console.log('message to connect timap table', curr_user)
+        // console.log('message to connect timap table', curr_user)
         this.connect(curr_user).then((response) => {
-            console.log('response from sequelize', response)
+            // console.log('response from sequelize', response)
             if(response) {
                 // user found 
                 var attrs = this.getAttributes(args);
@@ -136,6 +138,15 @@ class timap {
     cron() {
 
     }
+    async loadTasks(message, args) {
+       var users = await TimapUsers.findAll();
+       users.map(async (user) => {
+            var TasksbyUser = await Tasks.findAll({where: {
+                username: user.dataValues.username
+            }})
+            // console.log('Tasks by user', TasksbyUser);
+       })
+    }
     task() {
 
     }
@@ -155,9 +166,22 @@ class timap {
         }
         return rt;
     }
+    async manageProjects(string) {
+        var getClientBySearch = await axios.get({
+            method:'get',
+            url: 'http://mediactive.timap.net/',
+            data: {
+                term: string.trim().toLowerCase(),
+                action: 'getListeClientBySearch'
+            },
+            headers: {'Origin': 'http://mediactive.timap.net/'}
+        })
+        console.log('getClientBySearch', getClientBySearch)
+    }
     addTask(obj) {
         obj.hour = parseInt(obj.hour);
         obj.day = this.manageHours(obj.day);
+        obj.task = this.manageProjects(obj.task);
         console.log('obj to addTask', obj);
 
         var that = this;
@@ -168,7 +192,7 @@ class timap {
         }).spread( function(tag, created){
             console.log('created', created)
             if( created ){
-                that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer au cas ou. l\'id de la tache est : '+ obj.task_id +'');
+                that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_id +'');
             }
             else {
                 that.currentMessage.reply('Erreur, votre tache n\'a pas pu être sauvegardée. Veuillez recommencer.');
@@ -178,17 +202,22 @@ class timap {
     }
     removeTask(obj) {
         console.log('test', obj)
+        
+        var that = this;
+        
         Tasks.destroy({
             where: obj
-        }).spread( function(tag, detroyed){
-            // console.log('created', created)
+        }).then( function(detroyed){
+            console.log('detroyed', detroyed)
             if( detroyed ){
                 that.currentMessage.reply('Merci votre tache a été correctement supprimée.');
             }
             else {
                 that.currentMessage.reply('Erreur, votre tache n\'a pas pu être supprimée. Veuillez recommencer.');
             }
-        });
+        }).catch((err) => {
+            that.currentMessage.reply('Erreur, votre tache n\'a pas pu être supprimée. Veuillez recommencer.');
+        })
     }
 
 

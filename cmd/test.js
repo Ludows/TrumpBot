@@ -20,6 +20,12 @@ module.exports.run = function(args, message) {
     case 'unregister':
         timap.unregister(message, args);
     break;
+
+    case 'load':
+        timap.loadTasks(message, args).then((res) => {
+          
+        });
+    break;
   }
 }
 
