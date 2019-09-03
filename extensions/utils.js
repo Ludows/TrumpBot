@@ -1,5 +1,6 @@
 var axiosAPI = require('../libs').axios;
 var cheerioAPI = require('../libs').cheerio;
+var bot = require('../libs').bot
 
 
 function Utils() {}
@@ -147,11 +148,20 @@ Utils.prototype = {
     }
 
     // console.log('embed format', embed)
+    // console.log('object in sender with reactions ?', obj);
 
     if (Utils.prototype.isId(obj.args) != false) {
       var idFormated = Utils.prototype.idChecker(obj.args);
       // console.log('idFormated', idFormated.toString())
-        obj.message.guild.members.get(idFormated.toString()).send(embed);
+        obj.message.guild.members.get(idFormated.toString()).send(embed).then((resEmbed) => {
+          
+          if(obj.reactions && obj.reactions.length > 0) {
+            obj.reactions.forEach(async (reaction) => {
+              console.log('obj.message.guild.emojis[reaction]', obj.message.guild.emojis[reaction])
+              await resEmbed.react(obj.message.guild.emojis[reaction].id);
+            })
+          }
+        });
         obj.message.reply('Cela a bien été envoyé !');
 
     } else if (obj.args.includes('@everyone') === true) {
@@ -161,7 +171,13 @@ Utils.prototype = {
         // console.log('element', element);
         if (element.user.bot === false) {
 
-            element.user.send(embed);
+            element.user.send(embed).then((resEmbed) => {
+              if(obj.reactions && obj.reactions.length > 0) {
+                obj.reactions.forEach(async (reaction) => {
+                  await resEmbed.react(reaction);
+                })
+              }
+            });
         }
 
       })
@@ -170,11 +186,28 @@ Utils.prototype = {
       obj.message.reply('Rien que pour toi...')
 
 
-        obj.message.author.send(embed);
+        obj.message.author.send(embed).then((resEmbed) => {
+          if(obj.reactions && obj.reactions.length > 0) {
+            obj.reactions.forEach(async (reaction) => {
+              await resEmbed.react(reaction);
+            })
+          }
+        });
     } else {
       // obj.message.reply('Rien que pour toi... C\'est envoyé !')
 
-        obj.message.channel.send(embed);
+        obj.message.channel.send(embed).then((resEmbed) => {
+          if(obj.reactions && obj.reactions.length > 0) {
+            obj.reactions.forEach(async (reaction) => {
+              console.log('emojis', bot.emojis)
+
+              bot.emojis.forEach((emo) => {
+                console.log('emoji yeap', emo)
+              })
+              await resEmbed.react('U+1F600');
+            })
+          }
+        });
 
       console.log('sended')
     }

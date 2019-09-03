@@ -17,11 +17,15 @@ const bot = require('../libs').bot
 class timap {
     constructor(opts) {
         this.currentMessage = '';
+        this.emojis = [];
     }
     // encrypt users
     async connect(collection) {
         
-        
+        if(this.emojis.length === 0) {
+            var emojis = new emojiReader()
+            this.emojis = await emojis.fetch();
+        }
         var connection = await TimapUsers.findOne({ username: collection.username });
 
         return connection;
@@ -64,6 +68,8 @@ class timap {
     }
     register(message, args) {
         this.currentMessage = message;
+        this.currentArgs = args;
+
         var curr_user = bot.users.get( message.author.id );
         // console.log('message to connect timap table', curr_user)
         this.connect(curr_user).then((response) => {
@@ -175,25 +181,50 @@ class timap {
         }
         return rt;
     }
-    async needUserSelection(cheerioObject) {
+    async needUserSelection(html) {
+        let rt;
         const embed = new discordAPI.RichEmbed()
+        const selectedReactions = new Array();
+        let $;
+        $ = cheerio.load(html);
+        var li = $('li');
+        var that = this;
+        li.each(function(index, obj) {
+            var text_libelle = $(obj).find('.libelleProjet').text();
+		    console.log('text_libelle', text_libelle);
 
-        cheerioObject.each(function(index, obj) {
-            var text_libelle = obj.find('.libelleProjet').text();
-		    console.log('args');
-			embed.addField(text_libelle, obj.value);
-
+            // console.log('that.emojis', that.emojis);
+            var rand =  Math.floor(Math.random() * (that.emojis.length - 1));
+            embed.addField(text_libelle, that.emojis[rand]['name']);
+            selectedReactions.push(that.emojis[rand]['slug']);
 
     
         })
+
+        console.log('selectedReactions', selectedReactions)
         
         var instances_dependencies = {
             message : this.currentMessage,
             discord : discordAPI,
             args : this.currentArgs,
-            embed: embed
+            embed: embed,
+            reactions: selectedReactions
           }
           Helper.sender(instances_dependencies);
+
+          const filter = (reaction, user) => {
+              let ret;
+              for (let index = 0; index < selectedReactions.length; index++) {
+                  const reactionSend = selectedReactions[index];
+                  ret = reactionSend;
+              }
+            return reaction.emoji.name === ret && user.id === this.currentMessage.author.id;
+        };
+
+        rt = await this.currentMessage.awaitReactions(filter, { max: selectedReactions.length, time: 60000, errors: ['time'] })
+        console.log('returning await reactions', rt);
+        return rt;
+          
     }
     async performRequest(obj) {
        let rt;
@@ -213,7 +244,7 @@ class timap {
                 'Cookie': 'PHPSESSID=tavk7enfbaul2ajsov8aicbfj0; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
         })
-        console.log('getClientBySearch', getClientBySearch)
+        console.log('getClientBySearch', getClientBySearch.data)
         let $;
         $ = cheerio.load(getClientBySearch.data)
         var li_s = $('li');
@@ -223,7 +254,7 @@ class timap {
             var client_id;
             var projet_id;
                 if(li_s.length > 1) {
-                    client_id = await this.needUserSelection(li_s); 
+                    client_id = await this.needUserSelection(getClientBySearch.data); 
                 }
                 else {
                     client_id = li_s.attr('client_id');
@@ -245,7 +276,7 @@ class timap {
             var tasks = $('li.task')
 
             if(tasks.length > 1) {
-                projet_id = await this.needUserSelection(tasks); 
+                projet_id = await this.needUserSelection(getListeVignetteByClientId.data); 
             }
             else {
                 projet_id = tasks.attr('project_id');
