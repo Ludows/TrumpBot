@@ -4,6 +4,12 @@ const TimapUsers = require( '../models/timap/user')(dbDriver, Sequelize.DataType
 const Tasks = require( '../models/timap/tasks')(dbDriver, Sequelize.DataTypes);
 const moment = require('moment');
 const axios = require('axios');
+const qs = require('qs');
+const cheerio = require('cheerio');
+var Helpers = require('./utils');
+var discordAPI = require('../libs').Discord;
+var Helper = new Helpers();
+var emojiReader = require('../libs').emojiReader
 
 
 const bot = require('../libs').bot
@@ -24,6 +30,7 @@ class timap {
     }
     unregister(message, args) {
         this.currentMessage = message;
+        this.currentArgs = args;
         var curr_user = bot.users.get( message.author.id );
         // console.log('message to connect timap table', curr_user)
         this.connect(curr_user).then((response) => {
@@ -74,7 +81,9 @@ class timap {
                 else {
                     // var 
                     var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_id: this.generate_task_id(16) })  
-                    this.addTask(objectToSend);
+                    this.addTask(objectToSend).then((str) => {
+                        console.log('string executed', str)
+                    });
                 }
 
             }
@@ -166,22 +175,89 @@ class timap {
         }
         return rt;
     }
+    async needUserSelection(cheerioObject) {
+        const embed = new discordAPI.RichEmbed()
+
+        cheerioObject.each(function(index, obj) {
+            var text_libelle = obj.find('.libelleProjet').text();
+		    console.log('args');
+			embed.addField(text_libelle, obj.value);
+
+
+    
+        })
+        
+        var instances_dependencies = {
+            message : this.currentMessage,
+            discord : discordAPI,
+            args : this.currentArgs,
+            embed: embed
+          }
+          Helper.sender(instances_dependencies);
+    }
+    async performRequest(obj) {
+       let rt;
+       rt = await axios(obj)
+        return rt;
+    }
     async manageProjects(string) {
-        var getClientBySearch = await axios.get({
-            method:'get',
-            url: 'http://mediactive.timap.net/',
-            data: {
-                term: string.trim().toLowerCase(),
-                action: 'getListeClientBySearch'
-            },
-            headers: {'Origin': 'http://mediactive.timap.net/'}
+        // console.log('manage task', string)
+        var datas = { 'term': string.trim().toLowerCase(),'action': 'getListeClientBySearch'} 
+        var getClientBySearch = await this.performRequest({
+            method:'post',
+            url: 'http://mediactive.timap.net/layouts/ajax_requests/projet.php',
+            data: qs.stringify(datas),
+            headers: {
+                'Origin': 'http://mediactive.timap.net/', 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': 'PHPSESSID=tavk7enfbaul2ajsov8aicbfj0; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
         })
         console.log('getClientBySearch', getClientBySearch)
+        let $;
+        $ = cheerio.load(getClientBySearch.data)
+        var li_s = $('li');
+
+        
+        // else {
+            var client_id;
+            var projet_id;
+                if(li_s.length > 1) {
+                    client_id = await this.needUserSelection(li_s); 
+                }
+                else {
+                    client_id = li_s.attr('client_id');
+                }
+
+            var client_id_datas = { 'client_id': client_id ,'action': 'getListeVignetteByClientId'} 
+            var getListeVignetteByClientId = await this.performRequest({
+                method:'post',
+                url: 'http://mediactive.timap.net/layouts/ajax_requests/projet.php',
+                data: qs.stringify(client_id_datas),
+                headers: {
+                    'Origin': 'http://mediactive.timap.net/', 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Cookie': 'PHPSESSID=tavk7enfbaul2ajsov8aicbfj0; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
+            })
+            console.log('getListeVignetteByClientId', getListeVignetteByClientId.data)
+            $ = cheerio.load(getListeVignetteByClientId.data);
+            var tasks = $('li.task')
+
+            if(tasks.length > 1) {
+                projet_id = await this.needUserSelection(tasks); 
+            }
+            else {
+                projet_id = tasks.attr('project_id');
+            }
+        // }
+
+        return string;
     }
-    addTask(obj) {
+    async addTask(obj) {
         obj.hour = parseInt(obj.hour);
         obj.day = this.manageHours(obj.day);
-        obj.task = this.manageProjects(obj.task);
+        obj.task = await this.manageProjects(obj.task);
         console.log('obj to addTask', obj);
 
         var that = this;
@@ -198,6 +274,8 @@ class timap {
                 that.currentMessage.reply('Erreur, votre tache n\'a pas pu être sauvegardée. Veuillez recommencer.');
             }
         });
+
+        return 'addTask executed';
 
     }
     removeTask(obj) {
