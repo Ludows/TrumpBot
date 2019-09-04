@@ -1,6 +1,13 @@
 var axiosAPI = require('../libs').axios;
 var cheerioAPI = require('../libs').cheerio;
-var bot = require('../libs').bot
+// var bot = require('../libs').bot
+const emojis = require("emojis");
+const emojis_discord = require("discord-emoji")
+
+// console.log('emojis_discord', emojis_discord
+// )
+
+
 
 
 function Utils() {}
@@ -198,13 +205,9 @@ Utils.prototype = {
 
         obj.message.channel.send(embed).then((resEmbed) => {
           if(obj.reactions && obj.reactions.length > 0) {
-            obj.reactions.forEach(async (reaction) => {
-              console.log('emojis', bot.emojis)
-
-              bot.emojis.forEach((emo) => {
-                console.log('emoji yeap', emo)
-              })
-              await resEmbed.react('U+1F600');
+            obj.reactions.forEach(async (reaction) => {             
+              console.log('emoji unicode ?', emojis.unicode(reaction))
+              await resEmbed.react(emojis.unicode(reaction));
             })
           }
         });

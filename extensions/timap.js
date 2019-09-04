@@ -9,7 +9,7 @@ const cheerio = require('cheerio');
 var Helpers = require('./utils');
 var discordAPI = require('../libs').Discord;
 var Helper = new Helpers();
-var emojiReader = require('../libs').emojiReader
+var Emojis = require('emojis')
 
 
 const bot = require('../libs').bot
@@ -17,15 +17,13 @@ const bot = require('../libs').bot
 class timap {
     constructor(opts) {
         this.currentMessage = '';
-        this.emojis = [];
+        this.emojis = require('discord-emoji');
     }
     // encrypt users
     async connect(collection) {
         
-        if(this.emojis.length === 0) {
-            var emojis = new emojiReader()
-            this.emojis = await emojis.fetch();
-        }
+            
+        
         var connection = await TimapUsers.findOne({ username: collection.username });
 
         return connection;
@@ -194,9 +192,23 @@ class timap {
 		    console.log('text_libelle', text_libelle);
 
             // console.log('that.emojis', that.emojis);
-            var rand =  Math.floor(Math.random() * (that.emojis.length - 1));
-            embed.addField(text_libelle, that.emojis[rand]['name']);
-            selectedReactions.push(that.emojis[rand]['slug']);
+            var first_level_keys = Object.keys(that.emojis);
+            console.log('first_level_keys', first_level_keys)
+            var rand1 =  Math.floor(Math.random() * (Object.keys(that.emojis).length - 1));
+            console.log('rand1', rand1)
+            
+            var first_level = that.emojis[first_level_keys[rand1]];
+            console.log('first_level', first_level)
+
+            var last_level_keys = Object.keys(that.emojis[first_level_keys[rand1]]);
+            var rand2 =  Math.floor(Math.random() * (last_level_keys.length - 1));
+
+            // console.log('emoji debug', last_level_keys[rand2])
+
+            var the_selected_emoji = last_level_keys[rand2];
+
+            embed.addField(text_libelle, ':'+the_selected_emoji+':');
+            selectedReactions.push(the_selected_emoji);
 
     
         })
@@ -212,7 +224,10 @@ class timap {
           }
           Helper.sender(instances_dependencies);
 
-          const filter = (reaction, user) => {
+          const filter = (reaction, user) => {      
+              console.log('filter reaction', reaction)
+              console.log('user', user)
+
               let ret;
               for (let index = 0; index < selectedReactions.length; index++) {
                   const reactionSend = selectedReactions[index];
@@ -221,7 +236,7 @@ class timap {
             return reaction.emoji.name === ret && user.id === this.currentMessage.author.id;
         };
 
-        rt = await this.currentMessage.awaitReactions(filter, { max: selectedReactions.length, time: 60000, errors: ['time'] })
+        rt = await this.currentMessage.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
         console.log('returning await reactions', rt);
         return rt;
           
