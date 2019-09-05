@@ -17,7 +17,7 @@ const bot = require('../libs').bot
 class timap {
     constructor(opts) {
         this.currentMessage = '';
-        this.emojis = require('discord-emoji');
+        this.emojis = require('discord-emoji').objects;
     }
     // encrypt users
     async connect(collection) {
@@ -187,28 +187,30 @@ class timap {
         $ = cheerio.load(html);
         var li = $('li');
         var that = this;
+
+        var listingFieldsWithReactionsAttached = new Array();
         li.each(function(index, obj) {
             var text_libelle = $(obj).find('.libelleProjet').text();
 		    console.log('text_libelle', text_libelle);
 
             // console.log('that.emojis', that.emojis);
             var first_level_keys = Object.keys(that.emojis);
-            console.log('first_level_keys', first_level_keys)
+            // console.log('first_level_keys', first_level_keys)
             var rand1 =  Math.floor(Math.random() * (Object.keys(that.emojis).length - 1));
-            console.log('rand1', rand1)
+            // console.log('rand1', rand1)
+
+    
             
-            var first_level = that.emojis[first_level_keys[rand1]];
-            console.log('first_level', first_level)
+            var the_selected_emoji = {slug: first_level_keys[rand1], emoji : that.emojis[first_level_keys[rand1]]};
 
-            var last_level_keys = Object.keys(that.emojis[first_level_keys[rand1]]);
-            var rand2 =  Math.floor(Math.random() * (last_level_keys.length - 1));
-
-            // console.log('emoji debug', last_level_keys[rand2])
-
-            var the_selected_emoji = last_level_keys[rand2];
-
-            embed.addField(text_libelle, ':'+the_selected_emoji+':');
+            
+            
+            embed.addField(text_libelle, ':'+the_selected_emoji.slug+':');
             selectedReactions.push(the_selected_emoji);
+            listingFieldsWithReactionsAttached[index] = new Object();
+            
+            listingFieldsWithReactionsAttached[index].libelle = text_libelle;
+            listingFieldsWithReactionsAttached[index].linkedReaction = the_selected_emoji;
 
     
         })
@@ -220,24 +222,38 @@ class timap {
             discord : discordAPI,
             args : this.currentArgs,
             embed: embed,
-            reactions: selectedReactions
+            reactions: selectedReactions,
+            hooks : {
+                reactionsAdded: (mess, reactionsAdded) => {
+                    console.log('message id', mess.id)
+                    console.log('reactionsAdded', reactionsAdded)
+                    const filter = (reaction, user) => {
+                        console.log('reaction in filter')
+                        console.log('user filter')
+                        return reactionsAdded.includes(reaction.emoji.name) && user.id === this.currentMessage.author.id;
+                    };
+                    
+                    mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] })
+                        .then(collected => {
+                            console.log('collected succes', collected)
+                            const reaction = collected.first();
+                    
+                            
+                        })
+                        .catch(collected => {
+                            console.log('err collection', collected)
+                            mess.reply('tu n\'as pas réagi à temps looser...');
+                            mess.delete()
+                        });
+                }
+            }
           }
           Helper.sender(instances_dependencies);
 
-          const filter = (reaction, user) => {      
-              console.log('filter reaction', reaction)
-              console.log('user', user)
+          
 
-              let ret;
-              for (let index = 0; index < selectedReactions.length; index++) {
-                  const reactionSend = selectedReactions[index];
-                  ret = reactionSend;
-              }
-            return reaction.emoji.name === ret && user.id === this.currentMessage.author.id;
-        };
-
-        rt = await this.currentMessage.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
-        console.log('returning await reactions', rt);
+        rt = this.currentMessage
+        // console.log('returning await reactions', rt);
         return rt;
           
     }

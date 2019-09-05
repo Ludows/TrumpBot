@@ -204,11 +204,23 @@ Utils.prototype = {
       // obj.message.reply('Rien que pour toi... C\'est envoyé !')
 
         obj.message.channel.send(embed).then((resEmbed) => {
+          
           if(obj.reactions && obj.reactions.length > 0) {
-            obj.reactions.forEach(async (reaction) => {             
-              console.log('emoji unicode ?', emojis.unicode(reaction))
-              await resEmbed.react(emojis.unicode(reaction));
+            var arrayEmojis = new Array();
+            obj.reactions.forEach((react) => {
+              arrayEmojis.push(react.emoji);
             })
+
+            obj.reactions.forEach(async (reaction) => {             
+              // console.log('emoji unicode ?', emojis.unicode(reaction))
+
+              
+              await resEmbed.react(reaction.emoji);
+              // await arrayEmojis.push(reaction.emoji);
+            })
+            // console.log('arrayEmojis', arrayEmojis)
+            console.log('hooks reactions added called')
+            obj.hooks.reactionsAdded(resEmbed, arrayEmojis);
           }
         });
 
