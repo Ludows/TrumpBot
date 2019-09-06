@@ -190,7 +190,7 @@ class timap {
 
         var listingFieldsWithReactionsAttached = new Array();
         li.each(function(index, obj) {
-            var text_libelle = $(obj).find('.libelleProjet').text();
+            var text_libelle = $(this).find('.libelleProjet').text();
 		    console.log('text_libelle', text_libelle);
 
             // console.log('that.emojis', that.emojis);
@@ -212,8 +212,10 @@ class timap {
             listingFieldsWithReactionsAttached[index].libelle = text_libelle;
             listingFieldsWithReactionsAttached[index].linkedReaction = the_selected_emoji;
 
-            var attr1 = $(obj).attr('client_id');
-            var attr2 = $(obj).attr('projet_id');
+            var attr1 = $(this).children().first().attr('clientid');
+            var attr2 = $(this).children().first().attr('projetid');
+            console.log('attr1', attr1)
+            console.log('attr2', attr2) 
 
             if(typeof attr1 !== typeof undefined && attr1 !== false) {
                 listingFieldsWithReactionsAttached[index].client_id = attr1;
@@ -239,18 +241,24 @@ class timap {
                     console.log('message id', mess.id)
                     console.log('reactionsAdded', reactionsAdded)
                     const filter = (reaction, user) => {
-                        console.log('reaction in filter')
-                        console.log('user filter')
+                        // console.log('reaction in filter')
+                        // console.log('user filter')
                         return reactionsAdded.includes(reaction.emoji.name) && user.id === this.currentMessage.author.id;
                     };
                     
                     mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] })
                         .then(collected => {
-                            console.log('collected succes', collected)
+                            // console.log('collected succes', collected)
                             const reaction = collected.first();
+                            console.log('reaction', reaction._emoji.name)
 
-                            console.log('listing', listingFieldsWithReactionsAttached)
-                    
+                            console.log('listing', listingFieldsWithReactionsAttached);
+
+                            listingFieldsWithReactionsAttached.forEach((field) => {
+                                if(reaction._emoji.name === field.linkedReaction.emoji) {
+                                    console.log('tracked');
+                                }
+                            })
                             
                         })
                         .catch(collected => {
