@@ -212,10 +212,21 @@ class timap {
             listingFieldsWithReactionsAttached[index].libelle = text_libelle;
             listingFieldsWithReactionsAttached[index].linkedReaction = the_selected_emoji;
 
+            var attr1 = $(obj).attr('client_id');
+            var attr2 = $(obj).attr('projet_id');
+
+            if(typeof attr1 !== typeof undefined && attr1 !== false) {
+                listingFieldsWithReactionsAttached[index].client_id = attr1;
+            }
+
+            if(typeof attr2 !== typeof undefined && attr2 !== false) {
+                listingFieldsWithReactionsAttached[index].projet_id = attr2;
+            }
+
     
         })
 
-        console.log('selectedReactions', selectedReactions)
+        // console.log('selectedReactions', selectedReactions)
         
         var instances_dependencies = {
             message : this.currentMessage,
@@ -237,6 +248,8 @@ class timap {
                         .then(collected => {
                             console.log('collected succes', collected)
                             const reaction = collected.first();
+
+                            console.log('listing', listingFieldsWithReactionsAttached)
                     
                             
                         })
