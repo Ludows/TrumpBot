@@ -7,12 +7,9 @@ const emojis_discord = require("discord-emoji")
 // console.log('emojis_discord', emojis_discord
 // )
 
-
-
-
-function Utils() {}
-Utils.prototype = {
-  isSubcommand: function(subcommand, array) {
+class Utils {
+  constructor() {}
+  isSubcommand(subcommand, array) {
     var val = false;
     if (array === undefined) {
       throw new Error('La liste de sous commandes n\'est pas définie');
@@ -24,8 +21,8 @@ Utils.prototype = {
       }
     })
     return val;
-  },
-  isCrypto: function(query, obj) {
+  }
+  isCrypto(query, obj) {
     var val = false;
     if (obj === undefined) {
       throw new Error('La liste de cryptomonnaies n\'est pas définie');
@@ -40,8 +37,8 @@ Utils.prototype = {
       }
     })
     return val;
-  },
-  idChecker: function(args) {
+  }
+  idChecker(args) {
     var regexp = /(\d+(d)*)/gi;
     var theid;
     args.forEach(function(val) {
@@ -49,15 +46,15 @@ Utils.prototype = {
     })
 
     return theid;
-  },
-  unique: function(arr) {
+  }
+  unique(arr) {
     var a = [];
     for (var i = 0, l = arr.length; i < l; i++)
       if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
         a.push(arr[i]);
     return a;
-  },
-  uniquelinkedto: function(arr, arr2) {
+  }
+  uniquelinkedto(arr, arr2) {
     var a = [];
     var b = [];
     for (var i = 0, l = arr.length; i < l; i++)
@@ -65,27 +62,26 @@ Utils.prototype = {
         a.push(arr[i]);
     b.push(arr2[i]);
     return [a, b];
-  },
-  isId: function(args) {
-    // console.log('the args', args)
-    var regexp = /(@!\d+(d)*)/gi;
-    var theid;
-    args.forEach(function(val) {
-      theid = val.match(regexp);
-      // console.log('matchId ?', theid)
-    })
-
-    // console.log('theid is', theid)
-
-    if (theid === null) {
-      return false;
-    } else if (theid === undefined) {
-      return false;
-    } else {
-      return true;
-    }
-
-  },
+  }
+  isId(args) {
+     // console.log('the args', args)
+     var regexp = /(@!\d+(d)*)/gi;
+     var theid;
+     args.forEach(function(val) {
+       theid = val.match(regexp);
+       // console.log('matchId ?', theid)
+     })
+ 
+     // console.log('theid is', theid)
+ 
+     if (theid === null) {
+       return false;
+     } else if (theid === undefined) {
+       return false;
+     } else {
+       return true;
+     }
+  }
   isjQueryMethod(args, array) {
     var val = false;
     if (!array) {
@@ -102,8 +98,8 @@ Utils.prototype = {
     console.log('is jquery method return ?', val)
 
     return val;
-  },
-  formatforSender: function(args, message, discord, embed) {
+  }
+  formatforSender(args, message, discord, embed) {
     var obj = new Object();
     obj.message = message
     obj.discord = discord
@@ -112,8 +108,8 @@ Utils.prototype = {
     obj.embed = embed
 
     return obj;
-  },
-  slugify: function(str) {
+  }
+  slugify(str) {
     var slug = str.toString()
       .trim()
       .toLowerCase()
@@ -124,8 +120,8 @@ Utils.prototype = {
       .replace(/-+$/, "");
 
     return slug;
-  },
-  extend: function(a, b) {
+  }
+  extend(a, b) {
     for (var key in b) {
       if (b.hasOwnProperty(key)) {
         a[key] = b[key];
@@ -133,8 +129,8 @@ Utils.prototype = {
     }
     // console.log('return a', a);
     return a;
-  },
-  sender: function(obj) {
+  }
+  sender(obj) {
 
     // EVOL sender
 
@@ -203,7 +199,7 @@ Utils.prototype = {
     } else {
       // obj.message.reply('Rien que pour toi... C\'est envoyé !')
 
-        obj.message.channel.send(embed).then((resEmbed) => {
+        obj.message.channel.send(embed).then(async (resEmbed) => {
           
           if(obj.reactions && obj.reactions.length > 0) {
             var arrayEmojis = new Array();
@@ -220,17 +216,16 @@ Utils.prototype = {
             })
             // console.log('arrayEmojis', arrayEmojis)
             console.log('hooks reactions added called')
-            obj.hooks.reactionsAdded(resEmbed, arrayEmojis);
+            await obj.hooks.reactionsAdded(resEmbed, arrayEmojis);
+            console.log('sended')
           }
         });
 
-      console.log('sended')
+      
     }
-  },
-  getRichEmbed: function() {
-    // @todo
   }
 }
+
 
 
 module.exports = Utils

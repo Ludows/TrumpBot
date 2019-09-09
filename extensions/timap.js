@@ -70,7 +70,7 @@ class timap {
 
         var curr_user = bot.users.get( message.author.id );
         // console.log('message to connect timap table', curr_user)
-        this.connect(curr_user).then((response) => {
+        this.connect(curr_user).then(async (response) => {
             // console.log('response from sequelize', response)
             if(response) {
                 // user found 
@@ -85,9 +85,12 @@ class timap {
                 else {
                     // var 
                     var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_id: this.generate_task_id(16) })  
-                    this.addTask(objectToSend).then((str) => {
-                        console.log('string executed', str)
-                    });
+                    console.log('a')
+                    var the_hours = await this.manageHours(objectToSend.day);
+                    console.log('B')
+                    var manage = await this.manageProjects(objectToSend.task);
+                    console.log('c')
+                    var exec = await this.addTask(objectToSend);
                 }
 
             }
@@ -237,7 +240,7 @@ class timap {
             embed: embed,
             reactions: selectedReactions,
             hooks : {
-                reactionsAdded: (mess, reactionsAdded) => {
+                reactionsAdded: async (mess, reactionsAdded) => {
                     console.log('message id', mess.id)
                     console.log('reactionsAdded', reactionsAdded)
                     const filter = (reaction, user) => {
@@ -245,10 +248,9 @@ class timap {
                         // console.log('user filter')
                         return reactionsAdded.includes(reaction.emoji.name) && user.id === this.currentMessage.author.id;
                     };
-                    
-                    mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] })
-                        .then(collected => {
-                            // console.log('collected succes', collected)
+                    try {
+                        var collected = await mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] });
+                            // console.log("ddfddf", debugTest)
                             const reaction = collected.first();
                             console.log('reaction', reaction._emoji.name)
 
@@ -257,24 +259,61 @@ class timap {
                             listingFieldsWithReactionsAttached.forEach((field) => {
                                 if(reaction._emoji.name === field.linkedReaction.emoji) {
                                     console.log('tracked');
+                                    rt = new Object();
+                                    
+                                    if(field.projet_id) {
+                                        rt.projet_id = field.projet_id;
+                                    }
+                                    if(field.client_id) {
+                                        rt.client_id = field.client_id;
+                                    }
                                 }
                             })
+
+                    } catch(err) {
+                        console.log(err); // TypeError: failed to fetch
+                        console.log('err collection', collected)
+                        mess.reply('tu n\'as pas réagi à temps looser...');
+                        mess.delete()
+                    }
+                    
+                    // mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] })
+                    //     .then(collected => {
+                    //         // console.log('collected succes', collected)
+                    //         const reaction = collected.first();
+                    //         console.log('reaction', reaction._emoji.name)
+
+                    //         console.log('listing', listingFieldsWithReactionsAttached);
+
+                    //         listingFieldsWithReactionsAttached.forEach((field) => {
+                    //             if(reaction._emoji.name === field.linkedReaction.emoji) {
+                    //                 console.log('tracked');
+                    //                 rt = new Object();
+                                    
+                    //                 if(field.projet_id) {
+                    //                     rt.projet_id = field.projet_id;
+                    //                 }
+                    //                 if(field.client_id) {
+                    //                     rt.client_id = field.client_id;
+                    //                 }
+                    //             }
+                    //         })
                             
-                        })
-                        .catch(collected => {
-                            console.log('err collection', collected)
-                            mess.reply('tu n\'as pas réagi à temps looser...');
-                            mess.delete()
-                        });
+                    //     })
+                    //     .catch(collected => {
+                    //         console.log('err collection', collected)
+                    //         mess.reply('tu n\'as pas réagi à temps looser...');
+                    //         mess.delete()
+                    //     });
                 }
             }
           }
-          Helper.sender(instances_dependencies);
+        await Helper.sender(instances_dependencies);
 
           
 
-        rt = this.currentMessage
-        // console.log('returning await reactions', rt);
+        // rt = 'yolo'
+        console.log('returning await reactions', rt);
         return rt;
           
     }
@@ -303,11 +342,14 @@ class timap {
 
         
         // else {
+            //  response_for_user;
             var client_id;
             var projet_id;
                 if(li_s.length > 1) {
-                    client_id = await this.needUserSelection(getClientBySearch.data); 
-                }
+                    var response_for_user = await this.needUserSelection(getClientBySearch.data); 
+                    // client_id = await this.needUserSelection(getClientBySearch.data); 
+                    console.log('response_for_user', response_for_user)
+                    }
                 else {
                     client_id = li_s.attr('client_id');
                 }
@@ -328,7 +370,10 @@ class timap {
             var tasks = $('li.task')
 
             if(tasks.length > 1) {
-                projet_id = await this.needUserSelection(getListeVignetteByClientId.data); 
+                // projet_id = await this.needUserSelection(getListeVignetteByClientId.data); 
+                var response_for_user = await this.needUserSelection(getListeVignetteByClientId.data); 
+                    // client_id = await this.needUserSelection(getClientBySearch.data); 
+                console.log('response_for_user', response_for_user)
             }
             else {
                 projet_id = tasks.attr('project_id');
@@ -338,25 +383,22 @@ class timap {
         return string;
     }
     async addTask(obj) {
-        obj.hour = parseInt(obj.hour);
-        obj.day = this.manageHours(obj.day);
-        obj.task = await this.manageProjects(obj.task);
-        console.log('obj to addTask', obj);
+        
 
         var that = this;
 
         
-        Tasks.findOrCreate({
-            where: obj
-        }).spread( function(tag, created){
-            console.log('created', created)
-            if( created ){
-                that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_id +'');
-            }
-            else {
-                that.currentMessage.reply('Erreur, votre tache n\'a pas pu être sauvegardée. Veuillez recommencer.');
-            }
-        });
+        // Tasks.findOrCreate({
+        //     where: obj
+        // }).spread( function(tag, created){
+        //     console.log('created', created)
+        //     if( created ){
+        //         that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_id +'');
+        //     }
+        //     else {
+        //         that.currentMessage.reply('Erreur, votre tache n\'a pas pu être sauvegardée. Veuillez recommencer.');
+        //     }
+        // });
 
         return 'addTask executed';
 
