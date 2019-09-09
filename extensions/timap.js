@@ -9,7 +9,8 @@ const cheerio = require('cheerio');
 var Helpers = require('./utils');
 var discordAPI = require('../libs').Discord;
 var Helper = new Helpers();
-var Emojis = require('emojis')
+var Emojis = require('emojis');
+var puppeteer = require('puppeteer');
 
 
 const bot = require('../libs').bot
@@ -86,10 +87,15 @@ class timap {
                     // var 
                     var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_id: this.generate_task_id(16) })  
                     console.log('a')
-                    var the_hours = await this.manageHours(objectToSend.day);
+                    var the_operateur = await this.manageOperateur(response);
+                    console.log('the_operateur', the_operateur)
+                    var the_hours = await this.manageTime(objectToSend.day);
+                    console.log('the_hours', the_hours)
                     console.log('B')
                     var manage = await this.manageProjects(objectToSend.task);
                     console.log('c')
+                    var objectToSendFinal = Object.assign({}, objectToSend, the_operateur, the_hours, manage)
+                    console.log('objectToSendFinal', objectToSendFinal)
                     var exec = await this.addTask(objectToSend);
                 }
 
@@ -169,16 +175,35 @@ class timap {
     tasks() {
         // return this.tasks;
     }
-    manageHours(string) {
-        let rt;
+    async manageOperateur(object) {
+        console.log('manageOperateur', object);
+        const browser = await puppeteer.launch({
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.goto('http://mediactive.timap.net/page.php');
+        await page.type('input[name=identifiant]', object.dataValues.email);
+        await page.type('input[name=password]', object.dataValues.password);
+        await page.click('input[name=submitLogin]');
+        let op = await page.$eval('a[operateurid]', el => el.getAttribute('operateurid'));
+        // console.log('operateur id', op)
+        await page.close();
+        return {operateur_id: op};
+    }
+    manageTime(string) {
+        let rt = new Object();
         // console.log('manage hour', string)
         if(string === 'now') {
             // console.log('a')
-          rt = moment().format();
+          console.log('unix timestamp', moment().startOf('day').unix())
+          rt.timestamp = moment().startOf('day').unix();
+          console.log('correct day format', moment().format('L'))
+          rt.day = moment().format('L');
         }
         else {
             // console.log('b')
-            rt = moment(string); 
+            rt.day = moment(string).format('L'); 
+            rt.timestamp = moment(string).startOf('day').unix();
         }
         return rt;
     }
@@ -299,6 +324,7 @@ class timap {
                         // rt.selected = false;
                     }
                 })
+                mess.delete()
 
         } catch(err) {
             console.log(err); // TypeError: failed to fetch
@@ -390,7 +416,7 @@ class timap {
 
         console.log('receive datas from manage Projects', response_for_user);
 
-        return string;
+        return response_for_user;
     }
     async addTask(obj) {
         
