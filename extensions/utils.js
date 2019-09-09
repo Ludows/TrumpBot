@@ -130,8 +130,8 @@ class Utils {
     // console.log('return a', a);
     return a;
   }
-  sender(obj) {
-
+  async sender(obj) {
+    let response;
     // EVOL sender
 
     // idChecker => boolean sur les args
@@ -147,7 +147,7 @@ class Utils {
 
     if (typeof obj.embed === 'string') {
       embed = obj.embed
-      console.log('string length', obj.embed.length);
+      // console.log('string length', obj.embed.length);
     }
 
     // console.log('embed format', embed)
@@ -156,73 +156,36 @@ class Utils {
     if (Utils.prototype.isId(obj.args) != false) {
       var idFormated = Utils.prototype.idChecker(obj.args);
       // console.log('idFormated', idFormated.toString())
-        obj.message.guild.members.get(idFormated.toString()).send(embed).then((resEmbed) => {
-          
-          if(obj.reactions && obj.reactions.length > 0) {
-            obj.reactions.forEach(async (reaction) => {
-              console.log('obj.message.guild.emojis[reaction]', obj.message.guild.emojis[reaction])
-              await resEmbed.react(obj.message.guild.emojis[reaction].id);
-            })
-          }
-        });
-        obj.message.reply('Cela a bien été envoyé !');
+        response = await obj.message.guild.members.get(idFormated.toString()).send(embed)
+        await obj.message.reply('Cela a bien été envoyé !');
 
     } else if (obj.args.includes('@everyone') === true) {
       let allMembers = obj.message.guild.members;
 
-      allMembers.forEach(function(element, index) {
+      allMembers.forEach(async function(element, index) {
         // console.log('element', element);
         if (element.user.bot === false) {
 
-            element.user.send(embed).then((resEmbed) => {
-              if(obj.reactions && obj.reactions.length > 0) {
-                obj.reactions.forEach(async (reaction) => {
-                  await resEmbed.react(reaction);
-                })
-              }
-            });
+          response = await element.user.send(embed)
         }
 
       })
-      obj.message.reply('Cela a bien été envoyé à tous les membres !');
+      await obj.message.reply('Cela a bien été envoyé à tous les membres !');
     } else if (obj.args.includes('@me') === true) {
-      obj.message.reply('Rien que pour toi...')
+      await obj.message.reply('Rien que pour toi...')
 
 
-        obj.message.author.send(embed).then((resEmbed) => {
-          if(obj.reactions && obj.reactions.length > 0) {
-            obj.reactions.forEach(async (reaction) => {
-              await resEmbed.react(reaction);
-            })
-          }
-        });
+        response = await obj.message.author.send(embed)
+
     } else {
       // obj.message.reply('Rien que pour toi... C\'est envoyé !')
 
-        obj.message.channel.send(embed).then(async (resEmbed) => {
-          
-          if(obj.reactions && obj.reactions.length > 0) {
-            var arrayEmojis = new Array();
-            obj.reactions.forEach((react) => {
-              arrayEmojis.push(react.emoji);
-            })
-
-            obj.reactions.forEach(async (reaction) => {             
-              // console.log('emoji unicode ?', emojis.unicode(reaction))
-
-              
-              await resEmbed.react(reaction.emoji);
-              // await arrayEmojis.push(reaction.emoji);
-            })
-            // console.log('arrayEmojis', arrayEmojis)
-            console.log('hooks reactions added called')
-            await obj.hooks.reactionsAdded(resEmbed, arrayEmojis);
-            console.log('sended')
-          }
-        });
+      response = await obj.message.channel.send(embed)
 
       
     }
+    console.log('sended');
+    return response;
   }
 }
 

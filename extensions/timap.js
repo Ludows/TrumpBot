@@ -185,15 +185,23 @@ class timap {
     async needUserSelection(html) {
         let rt;
         const embed = new discordAPI.RichEmbed()
-        const selectedReactions = new Array();
+        const selectedReactionsObject = new Array();
+        const selectedReactionsArray = new Array();
         let $;
         $ = cheerio.load(html);
         var li = $('li');
         var that = this;
 
         var listingFieldsWithReactionsAttached = new Array();
+        var text_libelle;
         li.each(function(index, obj) {
-            var text_libelle = $(this).find('.libelleProjet').text();
+            if($(this).hasClass('task') == false) {
+                text_libelle = $(this).find('.libelleProjet').contents().eq(0).text()
+            }
+            else {
+                text_libelle = $(this).find('.libelleProjet').text();
+            }
+            //  = $(this).find('.libelleProjet').text();
 		    console.log('text_libelle', text_libelle);
 
             // console.log('that.emojis', that.emojis);
@@ -209,7 +217,8 @@ class timap {
             
             
             embed.addField(text_libelle, ':'+the_selected_emoji.slug+':');
-            selectedReactions.push(the_selected_emoji);
+            selectedReactionsObject.push(the_selected_emoji);
+            selectedReactionsArray.push(the_selected_emoji.emoji);
             listingFieldsWithReactionsAttached[index] = new Object();
             
             listingFieldsWithReactionsAttached[index].libelle = text_libelle;
@@ -237,83 +246,74 @@ class timap {
             message : this.currentMessage,
             discord : discordAPI,
             args : this.currentArgs,
-            embed: embed,
-            reactions: selectedReactions,
-            hooks : {
-                reactionsAdded: async (mess, reactionsAdded) => {
-                    console.log('message id', mess.id)
-                    console.log('reactionsAdded', reactionsAdded)
-                    const filter = (reaction, user) => {
-                        // console.log('reaction in filter')
-                        // console.log('user filter')
-                        return reactionsAdded.includes(reaction.emoji.name) && user.id === this.currentMessage.author.id;
-                    };
-                    try {
-                        var collected = await mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] });
-                            // console.log("ddfddf", debugTest)
-                            const reaction = collected.first();
-                            console.log('reaction', reaction._emoji.name)
+            embed: embed          
+        }
+          
+        
 
-                            console.log('listing', listingFieldsWithReactionsAttached);
+        const filter = (reaction, user) => {
+            // console.log('reaction in filter')
+            // console.log('user filter')
+            return selectedReactionsArray.includes(reaction.emoji.name) && user.id === this.currentMessage.author.id;
+          };
+          try {
+            var mess = await Helper.sender(instances_dependencies);
 
-                            listingFieldsWithReactionsAttached.forEach((field) => {
-                                if(reaction._emoji.name === field.linkedReaction.emoji) {
-                                    console.log('tracked');
-                                    rt = new Object();
-                                    
-                                    if(field.projet_id) {
-                                        rt.projet_id = field.projet_id;
-                                    }
-                                    if(field.client_id) {
-                                        rt.client_id = field.client_id;
-                                    }
-                                }
-                            })
+            if(selectedReactionsArray && selectedReactionsArray.length > 0) {
+    
+                selectedReactionsArray.forEach(async (reaction) => {             
+                  // console.log('emoji unicode ?', emojis.unicode(reaction))
+    
+                  
+                  await mess.react(reaction);
+                  // await arrayEmojis.push(reaction.emoji);
+                })
+                
+              }
 
-                    } catch(err) {
-                        console.log(err); // TypeError: failed to fetch
-                        console.log('err collection', collected)
-                        mess.reply('tu n\'as pas réagi à temps looser...');
-                        mess.delete()
+
+            var collected = await mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] });
+                // console.log("ddfddf", debugTest)
+                const reaction = collected.first();
+                console.log('reaction', reaction._emoji.name)
+
+                console.log('listing', listingFieldsWithReactionsAttached);
+
+                listingFieldsWithReactionsAttached.forEach((field) => {
+                    if(reaction._emoji.name === field.linkedReaction.emoji) {
+                        console.log('tracked');
+                        rt = new Object();
+                        
+                        // rt.selected = true;
+                        
+                        if(field.client_id) {
+                            rt.folder = field.libelle;
+                            rt.client_id = field.client_id;
+                        }
+                        if(field.projet_id) {
+                            rt.projet_id = field.projet_id;
+                            rt.task = field.libelle;
+                        }
                     }
-                    
-                    // mess.awaitReactions(filter, { max: 1, time: 40000, errors: ['time'] })
-                    //     .then(collected => {
-                    //         // console.log('collected succes', collected)
-                    //         const reaction = collected.first();
-                    //         console.log('reaction', reaction._emoji.name)
+                    else {
+                        // rt.selected = false;
+                    }
+                })
 
-                    //         console.log('listing', listingFieldsWithReactionsAttached);
+        } catch(err) {
+            console.log(err); // TypeError: failed to fetch
+            console.log('err collection', collected)
+            mess.reply('tu n\'as pas réagi à temps looser...');
+            mess.delete()
+        }
+        
 
-                    //         listingFieldsWithReactionsAttached.forEach((field) => {
-                    //             if(reaction._emoji.name === field.linkedReaction.emoji) {
-                    //                 console.log('tracked');
-                    //                 rt = new Object();
-                                    
-                    //                 if(field.projet_id) {
-                    //                     rt.projet_id = field.projet_id;
-                    //                 }
-                    //                 if(field.client_id) {
-                    //                     rt.client_id = field.client_id;
-                    //                 }
-                    //             }
-                    //         })
-                            
-                    //     })
-                    //     .catch(collected => {
-                    //         console.log('err collection', collected)
-                    //         mess.reply('tu n\'as pas réagi à temps looser...');
-                    //         mess.delete()
-                    //     });
-                }
-            }
-          }
-        await Helper.sender(instances_dependencies);
+        
 
           
 
         // rt = 'yolo'
-        console.log('returning await reactions', rt);
+        // console.log('returning await reactions', rt);
         return rt;
           
     }
@@ -332,7 +332,7 @@ class timap {
             headers: {
                 'Origin': 'http://mediactive.timap.net/', 
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Cookie': 'PHPSESSID=tavk7enfbaul2ajsov8aicbfj0; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
         })
         console.log('getClientBySearch', getClientBySearch.data)
@@ -345,16 +345,23 @@ class timap {
             //  response_for_user;
             var client_id;
             var projet_id;
+            var response_for_user;
                 if(li_s.length > 1) {
-                    var response_for_user = await this.needUserSelection(getClientBySearch.data); 
+                    response_for_user = await this.needUserSelection(getClientBySearch.data); 
+                    response_for_user.search = string.trim().toLowerCase();
                     // client_id = await this.needUserSelection(getClientBySearch.data); 
-                    console.log('response_for_user', response_for_user)
+                    // console.log('response_for_user vignette projets', response_for_user)
                     }
                 else {
-                    client_id = li_s.attr('client_id');
+                    response_for_user = new Object();
+                    response_for_user.search = string.trim().toLowerCase();
+                    response_for_user.client_id = li_s.children().first().attr('clientid');
+                    response_for_user.folder = li_s.find('.libelleProjet').contents().eq(0).text()
                 }
+            
+            
 
-            var client_id_datas = { 'client_id': client_id ,'action': 'getListeVignetteByClientId'} 
+            var client_id_datas = { 'client_id': response_for_user.client_id ,'action': 'getListeVignetteByClientId'} 
             var getListeVignetteByClientId = await this.performRequest({
                 method:'post',
                 url: 'http://mediactive.timap.net/layouts/ajax_requests/projet.php',
@@ -362,7 +369,7 @@ class timap {
                 headers: {
                     'Origin': 'http://mediactive.timap.net/', 
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Cookie': 'PHPSESSID=tavk7enfbaul2ajsov8aicbfj0; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                    'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
             })
             console.log('getListeVignetteByClientId', getListeVignetteByClientId.data)
@@ -371,14 +378,17 @@ class timap {
 
             if(tasks.length > 1) {
                 // projet_id = await this.needUserSelection(getListeVignetteByClientId.data); 
-                var response_for_user = await this.needUserSelection(getListeVignetteByClientId.data); 
+                response_for_user = Object.assign({}, response_for_user, await this.needUserSelection(getListeVignetteByClientId.data)); 
                     // client_id = await this.needUserSelection(getClientBySearch.data); 
                 console.log('response_for_user', response_for_user)
             }
             else {
-                projet_id = tasks.attr('project_id');
+                response_for_user.project_id = tasks.children().first().attr('projectid');
+                response_for_user.task = tasks.find('.libelleProjet').text();
             }
         // }
+
+        console.log('receive datas from manage Projects', response_for_user);
 
         return string;
     }
