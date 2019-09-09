@@ -15,13 +15,31 @@ module.exports = {
         type: Sequelize.STRING
       },
       hour: {
-        type: Sequelize.INTEGER
+        type: Sequelize.FLOAT
       },
       day: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
       },
       username: {
         type: Sequelize.STRING
+      },
+      operateur_id: {
+        type: Sequelize.INTEGER
+      },
+      timestamp: {
+        type: Sequelize.INTEGER      
+      },
+      search: {
+        type: Sequelize.STRING
+      },
+      client_id: {
+        type: Sequelize.INTEGER
+      },
+      folder: {
+        type: Sequelize.STRING
+      },
+      projet_id: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
