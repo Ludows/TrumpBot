@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      task_identifier: {
+        type: Sequelize.STRING
+      },
       task_id: {
         type: Sequelize.STRING
       },
@@ -36,6 +39,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       folder: {
+        type: Sequelize.STRING
+      },
+      action_id: {
+        type: Sequelize.INTEGER
+      },
+      commentaire: {
         type: Sequelize.STRING
       },
       projet_id: {

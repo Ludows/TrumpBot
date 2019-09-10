@@ -50,7 +50,7 @@ class timap {
                 }
                 else {
                     // var 
-                    var objectToSend = Object.assign({}, { task_id: attrs.taskId })    
+                    var objectToSend = Object.assign({}, { task_identifier: attrs.taskId })    
                     this.removeTask(objectToSend);
                 }
 
@@ -64,6 +64,44 @@ class timap {
         }).catch((err) => {
             console.log('err', err)
         })
+    }
+    manageHour(string) {
+        let rt = {};
+        console.log('string manage hour', string)
+        
+        var check = this.mayThrowReplies('hour', {hour: string});
+        if(check === true) {
+            return;
+        }
+        else {
+            // var 
+            if(string.indexOf('h') > -1) {
+                var hours = string.split('h')
+                var the_number = parseInt(hours[1].trim())
+                // var possiblesFormats = [15, 30, 45];
+                var adjustement = '';
+
+                switch (the_number) {
+                    case 15:
+                        adjustement += '.25';
+                        break;
+                    case 30:
+                        adjustement += '.50';
+                        break;
+                    case 45:
+                        adjustement += '.75';
+                        break;
+                }
+                
+                rt.hour = hours[0]+adjustement;
+            
+            }
+            else {
+                rt.hour = string;
+            }
+        }
+        return rt;
+
     }
     register(message, args) {
         this.currentMessage = message;
@@ -85,18 +123,25 @@ class timap {
                 }
                 else {
                     // var 
-                    var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_id: this.generate_task_id(16) })  
+                    var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_identifier: this.generate_task_id(16) })  
                     console.log('a')
                     var the_operateur = await this.manageOperateur(response);
                     console.log('the_operateur', the_operateur)
-                    var the_hours = await this.manageTime(objectToSend.day);
-                    console.log('the_hours', the_hours)
-                    console.log('B')
-                    var manage = await this.manageProjects(objectToSend.task);
-                    console.log('c')
-                    var objectToSendFinal = Object.assign({}, objectToSend, the_operateur, the_hours, manage)
-                    console.log('objectToSendFinal', objectToSendFinal)
-                    var exec = await this.addTask(objectToSendFinal);
+                    var the_day = await this.manageTime(objectToSend.day);
+                    console.log('the_day', the_day)
+                    var check2 = this.mayThrowReplies('hour', {hour: objectToSend.hour});
+                    if(check2 === true) {
+                        return;
+                    }
+                    else {
+                        var the_hours = await this.manageHour(objectToSend.hour);
+                        console.log('the_hours', the_hours)
+                        var manage = await this.manageProjects(objectToSend.task);
+                        console.log('c')
+                        var objectToSendFinal = Object.assign({}, objectToSend, the_operateur, the_day, the_hours, manage)
+                        console.log('objectToSendFinal', objectToSendFinal)
+                        var exec = await this.addTask(objectToSendFinal);
+                    }   
                 }
 
             }
@@ -140,6 +185,34 @@ class timap {
                     err = true;
                 }
                 break;
+            case 'hour':
+                if(obj.hour.indexOf('h') > -1) {
+                    var hours = obj.hour.split('h')
+                    var count = 0;
+                    var the_number = parseInt(hours[1].trim())
+                    var possiblesFormats = [15, 30, 45]
+    
+                    for (let index = 0; index < possiblesFormats.length; index++) {
+                        const element = possiblesFormats[index];
+                        if(the_number === element) {
+                            count++;
+                            break;
+                        }
+                        
+                    }
+    
+                    if(count === 0) {
+                        err = true;
+                        this.currentMessage.reply('Le format spécifié des heures n\'est pas concordant.');
+                    }
+                }
+                else {
+                    /// le cas de 8, 7 , 6 
+                }
+                
+
+
+                break;
         
             default:
                 break;
@@ -166,7 +239,7 @@ class timap {
     //    users.map(async (user) => {
             var TaskToPrepare = await Tasks.findOne({where: {
                 username: object.username, 
-                task_id: object.task_id
+                task_identifier: object.task_identifier
             }})
             // console.log('TaskToPrepare', TaskToPrepare);
             // TaskToPrepare.forEach(async(task) => {
@@ -538,7 +611,12 @@ class timap {
     }
     async addTask(obj) {
         
-        obj.hour = parseInt(obj.hour);
+        if(obj.hour.indexOf('.') > -1) {
+            obj.hour = parseFloat(obj.hour);  
+        }
+        else {
+            obj.hour = parseInt(obj.hour);
+        }
         obj.operateur_id = parseInt(obj.operateur_id);
         obj.client_id = parseInt(obj.client_id);
         obj.projet_id = parseInt(obj.projet_id);
@@ -553,13 +631,13 @@ class timap {
                 // that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_id +'');
                 let prepareState = await that.prepareTask(obj)
                 console.log('prepareState', prepareState)
-                Tasks.update({
+                Tasks.update(
                     prepareState,
-                    where: {
-                        task_id: obj.task_id
-                    }
-                }).then(() => {
-                    that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_id +'');
+                    {where: {
+                        task_identifier: obj.task_identifier
+                    }}
+                ).then(() => {
+                    that.currentMessage.reply('Merci votre tache a été correctement affectée. Pour pouvoir la retirer, la modifier au cas ou. l\'id de la tache est : '+ obj.task_identifier +'');
 
                 })
 
