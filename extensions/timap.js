@@ -39,6 +39,7 @@ class timap {
         this.connect(curr_user).then((response) => {
             // console.log('response from sequelize', response)
             if(response) {
+                this.currentUser = response;
                 // user found 
                 var attrs = this.getAttributes(args);
                 // console.log('attrs', attrs)
@@ -112,6 +113,8 @@ class timap {
         this.connect(curr_user).then(async (response) => {
             // console.log('response from sequelize', response)
             if(response) {
+                this.currentUser = response;
+                console.log('this.currentUser', this.currentUser)
                 // user found 
                 var attrs = this.getAttributes(args);
                 console.log('attrs', attrs)
@@ -124,16 +127,16 @@ class timap {
                 else {
                     // var 
                     var objectToSend = Object.assign({}, attrs, { username: curr_user.username, task_identifier: this.generate_task_id(16) })  
-                    console.log('a')
-                    var the_operateur = await this.manageOperateur(response);
-                    console.log('the_operateur', the_operateur)
-                    var the_day = await this.manageTime(objectToSend.day);
-                    console.log('the_day', the_day)
                     var check2 = this.mayThrowReplies('hour', {hour: objectToSend.hour});
                     if(check2 === true) {
                         return;
                     }
                     else {
+                        console.log('a')
+                        var the_operateur = await this.manageOperateur(response);
+                        console.log('the_operateur', the_operateur)
+                        var the_day = await this.manageTime(objectToSend.day);
+                        console.log('the_day', the_day)
                         var the_hours = await this.manageHour(objectToSend.hour);
                         console.log('the_hours', the_hours)
                         var manage = await this.manageProjects(objectToSend.task);
@@ -155,6 +158,31 @@ class timap {
             console.log('err', err)
         })
         
+    }
+    async loadTasks(message, args) {
+        var users = await TimapUsers.findAll();
+        users.forEach(async(user) => {
+            var TasksByUser = await Tasks.findAll({
+                where: {
+                    username : user.dataValues.username
+                }
+            }) 
+
+            TasksByUser.forEach(async(task) => {
+                var datas_to_send = { 'ts[action_id]': task.dataValues.action_id,'ts[commentaire]': task.dataValues.commentaire, 'absolu' : 0, 'ts[duree]': task.dataValues.hour, 'ts[id]': 0, 'ts[client_id]' : task.dataValues.client_id, 'ts[projet_id]': task.dataValues.project_id, 'ts[operateur_id]': task.dataValues.operateur_id, 'ts[date]': task.dataValues.day, 'submitTask': 'Valider' } 
+                var The_Task = await this.performRequest({
+                    method:'post',
+                    url: 'http://mediactive.timap.net/layouts/ajax_requests/calendar.php?action=updateTask',
+                    data: qs.stringify(datas_to_send),
+                    headers: {
+                        'Origin': 'http://mediactive.timap.net/', 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL='+ encodeURIComponent(user.dataValues.email) +'; identifyP='+ encodeURIComponent(user.dataValues.password) +'',
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
+                })
+                console.log('The_Task', The_Task)
+            })
+        })
     }
     randomNumber(length) {
         return Math.floor(Math.random() * length)
@@ -251,7 +279,7 @@ class timap {
                     headers: {
                         'Origin': 'http://mediactive.timap.net/', 
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                        'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL='+ encodeURIComponent(this.currentUser.dataValues.email) +'; identifyP='+ encodeURIComponent(this.currentUser.dataValues.password) +'',
                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
                 })
                 // console.log('TaskSended', ModaleTask)
@@ -335,12 +363,12 @@ class timap {
                                 }
                                 catch(err) {
                                     console.log('erreur');
-                                    mess2.reply('erreur');
+                                    mess2.reply('VMalheureusement, vous n\'avez pas rempli à temps votre activité.');
                                 }
                             }
                             catch(err) {
                                 console.log('erreur');
-                                this.currentMessage.reply('erreur');
+                                this.currentMessage.reply('Erreur, le message suivant n\'a pu vous êtes délivré.');
                             }
 
 
@@ -348,12 +376,12 @@ class timap {
                     }
                     catch(err) {
                         console.log('erreur');
-                        mess.reply('erreur');
+                        mess.reply('Malhueureusement vous n\'avez pas pris le temps d\'inscrire votre tache.');
                     }
                 }
                 catch(err) {
                     console.log('erreur');
-                    this.currentMessage.reply('erreur');
+                    this.currentMessage.reply('Erreur, le message suivant n\'a pu vous êtes délivré.');
                 }
                 
                 return rt;
@@ -549,7 +577,7 @@ class timap {
             headers: {
                 'Origin': 'http://mediactive.timap.net/', 
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL='+ encodeURIComponent(this.currentUser.dataValues.email) +'; identifyP='+ encodeURIComponent(this.currentUser.dataValues.password) +'',
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
         })
         // console.log('getClientBySearch', getClientBySearch.data)
@@ -586,7 +614,7 @@ class timap {
                 headers: {
                     'Origin': 'http://mediactive.timap.net/', 
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL=l.cointrel%40mediactive.fr; identifyP=mediactive',
+                    'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL='+ encodeURIComponent(this.currentUser.dataValues.email) +'; identifyP='+ encodeURIComponent(this.currentUser.dataValues.password) +'',
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
             })
             // console.log('getListeVignetteByClientId', getListeVignetteByClientId.data)
