@@ -12,6 +12,16 @@ var Helper = new Helpers();
 var Emojis = require('emojis');
 var puppeteer = require('puppeteer');
 
+var nodemailer = require('../libs').mail;
+
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'theartist768@gmail.com',
+    pass: 'MICKEY3Ds'
+  }
+});
+
 
 const bot = require('../libs').bot
 
@@ -167,9 +177,40 @@ class timap {
                     username : user.dataValues.username
                 }
             }) 
-
+            var htmlEmail = '';
+            var sujetEmail = '';
+            htmlEmail += '<table width="640" cellspacing="0" cellpadding="0" border="0" align="center" style="max-width:640px; width:100%;" bgcolor="#FFFFFF">';
+                htmlEmail += '<tr>';
+                    htmlEmail += '<td align="center" valign="top" style="padding:10px;">';
+                        htmlEmail += '<table width="600" cellspacing="0" cellpadding="0" border="0" align="center" style="max-width:600px; width:100%;">';
+                        htmlEmail +=    '<tr>';
+                        htmlEmail +=        '<td align="center" valign="top" style="padding:10px;">TrumpBot</td>';
+                        htmlEmail +=    '</tr>';
+                        htmlEmail +=    '<tr>';
+                          if(TasksByUser.length > 1) {
+                            htmlEmail +=        '<td align="left" valign="top" style="padding:10px;">Les taches suivantes ont étés éxécutées avec succès ! </td>';
+                            sujetEmail += TasksByUser.length + ' taches éxécutées';
+                          }
+                          else {
+                            htmlEmail +=        '<td align="left" valign="top" style="padding:10px;">La tache suivante a été éxécutée avec succès ! </td>';
+                            sujetEmail += 'La tache éxécutée';
+                          }
+                        htmlEmail +=    '</tr>';
+                        
             TasksByUser.forEach(async(task) => {
-                var datas_to_send = { 'ts[action_id]': task.dataValues.action_id,'ts[commentaire]': task.dataValues.commentaire, 'absolu' : 0, 'ts[duree]': task.dataValues.hour, 'ts[id]': 0, 'ts[client_id]' : task.dataValues.client_id, 'ts[projet_id]': task.dataValues.project_id, 'ts[operateur_id]': task.dataValues.operateur_id, 'ts[date]': task.dataValues.day, 'submitTask': 'Valider' } 
+                var datas_to_send = { 
+                'ts[action_id]': task.dataValues.action_id,
+                'ts[commentaire]': task.dataValues.commentaire, 
+                'absolu' : 0, 
+                'ts[duree]': task.dataValues.hour, 
+                'ts[id]': 0, 
+                'ts[client_id]' : task.dataValues.client_id, 
+                'ts[projet_id]': task.dataValues.projet_id, 
+                'ts[operateur_id]': task.dataValues.operateur_id, 
+                'ts[date]': task.dataValues.day, 
+                'submitTask': 'Valider'            
+            } 
+            console.log('before sending', datas_to_send)
                 var The_Task = await this.performRequest({
                     method:'post',
                     url: 'http://mediactive.timap.net/layouts/ajax_requests/calendar.php?action=updateTask',
@@ -180,9 +221,30 @@ class timap {
                         'Cookie': 'PHPSESSID=s52kh9u280t3ii186ok0tpt975; identifyL='+ encodeURIComponent(user.dataValues.email) +'; identifyP='+ encodeURIComponent(user.dataValues.password) +'',
                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
                 })
-                console.log('The_Task', The_Task)
+                console.log('The_Task', The_Task.data)
+
+                if(The_Task.data[0] === 1) {
+                    htmlEmail +=    '<tr>';
+                        htmlEmail +=        '<td align="center" valign="top" style="padding:10px;">'+ task.dataValues.task +' avec un horaire décompté qui équivaut à '+ task.dataValues.hour +'</td>';
+                    htmlEmail +=    '</tr>';
+                }
+            
             })
+
+            htmlEmail += '</table></td></tr></table>';
+            
+            var mailOptions = {
+                from: 'theartist768@gmail.com',
+                to: user.dataValues.email,
+                subject: sujetEmail,
+                html: htmlEmail
+              };
+            var info = await transporter.sendMail(mailOptions);
+            console.log('Message sent: %s', info.messageId);
+
+            // message.reply('Un mail vous a été ')
         })
+        message.reply('Les tâches de tous les utilisateurs ont été correctement lancées')
     }
     randomNumber(length) {
         return Math.floor(Math.random() * length)
